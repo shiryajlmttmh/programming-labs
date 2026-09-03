@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Order::Order(int id, string address, double weight, string district) 
+Order::Order(int id, const string& address, double weight, const string& district)
 {
     this->id = id;
     this->address = address;
@@ -16,11 +16,11 @@ double Order::GetWeight() const { return weight; }
 string Order::GetDistrict() const { return district; }
 
 void Order::SetId(int newId) { id = newId; }
-void Order::SetAddress(string newAddress) { address = newAddress; }
+void Order::SetAddress(const string& newAddress) { address = newAddress; }
 void Order::SetWeight(double newWeight) { weight = newWeight; }
-void Order::SetDistrict(string newDistrict) { district = newDistrict; }
+void Order::SetDistrict(const string& newDistrict) { district = newDistrict; }
 
-string Order::GetFullInfo() const 
+string Order::GetFullInfo() const
 {
     return "Заказ номер " + to_string(id) +
         ". Адрес: " + address +
@@ -28,7 +28,7 @@ string Order::GetFullInfo() const
         ". Вес: " + to_string(weight) + " кг";
 }
 
-void Order::PrintFullInfo() const 
+void Order::PrintFullInfo() const
 {
     cout << GetFullInfo() << endl;
 }

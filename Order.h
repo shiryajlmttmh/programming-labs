@@ -11,7 +11,7 @@ private:
     std::string district;
 
 public:
-    Order(int id, std::string address, double weight, std::string district);
+    Order(int id, const std::string& address, double weight, const std::string& district);
 
     int GetId() const;
     std::string GetAddress() const;
@@ -19,9 +19,9 @@ public:
     std::string GetDistrict() const;
 
     void SetId(int newId);
-    void SetAddress(std::string newAddress);
+    void SetAddress(const std::string& newAddress);
     void SetWeight(double newWeight);
-    void SetDistrict(std::string newDistrict);
+    void SetDistrict(const std::string& newDistrict);
 
     std::string GetFullInfo() const;
     void PrintFullInfo() const;
