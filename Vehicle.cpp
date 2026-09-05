@@ -3,13 +3,41 @@
 
 using namespace std;
 
+bool Vehicle::IsValidType(const string& checkType) const
+{
+    return (checkType == "Мотоцикл" || checkType == "Машина");
+}
+
+double Vehicle::GetMaxCapacityForType(const string& checkType) const
+{
+    if (checkType == "Мотоцикл") return MAX_MOTORCYCLE_CAPACITY;
+    if (checkType == "Машина") return MAX_CAR_CAPACITY;
+    return MAX_CAR_CAPACITY; // дефолт
+}
+
 Vehicle::Vehicle(int id, const string& type, double capacity, const string& courierName, bool isAvailable)
 {
     this->id = id;
-    this->type = type;
-    this->capacity = capacity;
     this->courierName = courierName;
     this->isAvailable = isAvailable;
+
+    if (IsValidType(type)) this->type = type;
+    else
+    {
+        cout << "Предупреждение: Неизвестный тип транспорта '" << type
+            << "'. Установлен тип по умолчанию: 'Машина'." << endl;
+        this->type = "Машина";
+    }
+
+    double maxLimit = GetMaxCapacityForType(this->type);
+    if (capacity <= 0 || capacity > maxLimit)
+    {
+        cout << "Предупреждение: Некорректная грузоподъемность (" << capacity
+            << " кг) для типа " << this->type
+            << ". Установлено максимальное значение: " << maxLimit << " кг." << endl;
+        this->capacity = maxLimit;
+    }
+    else this->capacity = capacity;
 }
 
 bool Vehicle::AssignOrder(const Order& order)
@@ -55,8 +83,38 @@ string Vehicle::GetCourierName() const { return courierName; }
 bool Vehicle::GetIsAvailable() const { return isAvailable; }
 
 void Vehicle::SetId(int newId) { id = newId; }
-void Vehicle::SetType(const string& newType) { type = newType; }
-void Vehicle::SetCapacity(double newCapacity) { capacity = newCapacity; }
+
+void Vehicle::SetType(const string& newType) 
+{
+    if (!IsValidType(newType))
+    {
+        cout << "Ошибка: Разрешены только типы 'Мотоцикл' и 'Машина'!" << endl;
+        return;
+    }
+
+    type = newType;
+    double maxLimit = GetMaxCapacityForType(type);
+    if (capacity > maxLimit)
+    {
+        capacity = maxLimit;
+        cout << "Грузоподъемность скорректирована под новый тип: " << capacity << " кг." << endl;
+    }
+}
+
+void Vehicle::SetCapacity(double newCapacity)
+{
+    double maxLimit = GetMaxCapacityForType(type);
+    if (newCapacity > 0 && newCapacity <= maxLimit)
+    {
+        capacity = newCapacity;
+    }
+    else
+    {
+        cout << "Ошибка: Для типа " << type << " грузоподъемность должна быть от 0 до "
+            << maxLimit << " кг!" << endl;
+    }
+}
+
 void Vehicle::SetCourierName(const string& newCourierName) { courierName = newCourierName; }
 void Vehicle::SetIsAvailable(bool newStatus) { isAvailable = newStatus; }
 
