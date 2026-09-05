@@ -25,9 +25,9 @@ string Order::GetDistrict() const { return district; }
 void Order::SetId(int newId) { id = newId; }
 void Order::SetAddress(const string& newAddress) { address = newAddress; }
 
-void Order::SetWeight(double newWeight) 
+void Order::SetWeight(double newWeight)
 {
-    if (weight < MIN_WEIGHT || weight > MAX_WEIGHT)
+    if (newWeight < MIN_WEIGHT || newWeight > MAX_WEIGHT)
     {
         cout << "Ошибка: Вес заказа должен быть от " << MIN_WEIGHT
             << " до " << MAX_WEIGHT << " кг!" << endl;

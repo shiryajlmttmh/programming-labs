@@ -13,8 +13,8 @@ private:
     std::string courierName;
     bool isAvailable;
 
-    const double MAX_MOTORCYCLE_CAPACITY = 50.0;
-    const double MAX_CAR_CAPACITY = 1500.0;
+    static constexpr double MAX_MOTORCYCLE_CAPACITY = 50.0;
+    static constexpr double MAX_CAR_CAPACITY = 1500.0;
 
     bool IsValidType(const std::string& checkType) const;
     double GetMaxCapacityForType(const std::string& checkType) const;

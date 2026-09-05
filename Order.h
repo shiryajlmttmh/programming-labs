@@ -5,8 +5,8 @@
 class Order
 {
 private:
-    const double MIN_WEIGHT = 0.1;
-    const double MAX_WEIGHT = 1000;
+    static constexpr double MIN_WEIGHT = 0.1;
+    static constexpr double MAX_WEIGHT = 1000.0;
 
     int id;
     std::string address;

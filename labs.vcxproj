@@ -140,7 +140,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DeliveryService.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="Order.cpp" />
     <ClCompile Include="Vehicle.cpp" />
   </ItemGroup>
