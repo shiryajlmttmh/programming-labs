@@ -22,22 +22,19 @@ int main()
     SetConsoleOutputCP(65001);
 
     DeliveryService service;
-
     SeedData(service);
-
-    cout << "\n--- МЕНЮ СЛУЖБЫ ДОСТАВКИ ---" << endl;
-    cout << "1. Показать транспорт" << endl;
-    cout << "2. Показать заказы" << endl;
-    cout << "3. Назначить заказ на транспорт" << endl;
-    cout << "4. Завершить доставку" << endl;
-    cout << "0. Выход" << endl;
 
     int choice = -1;
     while (choice != 0)
     {
+        cout << "\n--- МЕНЮ СЛУЖБЫ ДОСТАВКИ ---" << endl;
+        cout << "1. Показать транспорт" << endl;
+        cout << "2. Показать заказы" << endl;
+        cout << "3. Назначить заказ на транспорт" << endl;
+        cout << "4. Завершить доставку по ID транспорта" << endl;
+        cout << "0. Выход" << endl;
         cout << "Выберите действие: ";
         cin >> choice;
-        cout << "\n";
 
         switch (choice)
         {
@@ -55,12 +52,10 @@ int main()
             break;
         }
         case 4: {
-            int vehicleId, orderId;
-            cout << "Введите ID транспорта: ";
+            int vehicleId;
+            cout << "Введите ID транспорта, завершившего доставку: ";
             cin >> vehicleId;
-            cout << "Введите ID заказа: ";
-            cin >> orderId;
-            service.CompleteDelivery(vehicleId, orderId);
+            service.CompleteDelivery(vehicleId);
             break;
         }
         case 0:

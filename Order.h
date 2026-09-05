@@ -12,6 +12,7 @@ private:
     std::string address;
     double weight;
     std::string district;
+    bool isAssigned;
 
 public:
     Order(int id, const std::string& address, double weight, const std::string& district);
@@ -20,11 +21,13 @@ public:
     std::string GetAddress() const;
     double GetWeight() const;
     std::string GetDistrict() const;
+    bool GetIsAssigned() const;
 
     void SetId(int newId);
-    void SetAddress(const std::string& newAddress);
+    void SetAddress(const string& newAddress);
     void SetWeight(double newWeight);
-    void SetDistrict(const std::string& newDistrict);
+    void SetDistrict(const string& newDistrict);
+    void SetIsAssigned(bool status);
 
     std::string GetFullInfo() const;
     void PrintFullInfo() const;

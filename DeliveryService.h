@@ -21,5 +21,5 @@ public:
     void AddOrder(const Order& order);
     bool AssignOrderToVehicle(int orderId);
     bool RemoveOrderById(int orderId);
-    bool CompleteDelivery(int vehicleId, int orderId);
+    bool CompleteDelivery(int vehicleId);
 };

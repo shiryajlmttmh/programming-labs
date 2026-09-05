@@ -12,7 +12,7 @@ double Vehicle::GetMaxCapacityForType(const string& checkType) const
 {
     if (checkType == "Мотоцикл") return MAX_MOTORCYCLE_CAPACITY;
     if (checkType == "Машина") return MAX_CAR_CAPACITY;
-    return MAX_CAR_CAPACITY; // дефолт
+    return MAX_CAR_CAPACITY; // дефолтный
 }
 
 Vehicle::Vehicle(int id, const string& type, double capacity, const string& courierName, bool isAvailable)
@@ -20,6 +20,7 @@ Vehicle::Vehicle(int id, const string& type, double capacity, const string& cour
     this->id = id;
     this->courierName = courierName;
     this->isAvailable = isAvailable;
+    this->currentOrderId = -1;
 
     if (IsValidType(type)) this->type = type;
     else
@@ -48,32 +49,34 @@ bool Vehicle::AssignOrder(const Order& order)
         return false;
     }
 
-    if (order.GetWeight() > capacity) 
+    if (order.GetWeight() > capacity)
     {
         cout << "Ошибка: вес заказа номер " << order.GetId() << " (" << order.GetWeight()
             << " кг) превышает грузоподъемность транспорта (" << capacity << " кг)!" << endl;
         return false;
     }
 
-    isAvailable = false; 
-    cout << "Курьер " << courierName << "(" << type << " номер " << id
-        << ") взял заказ номер " << order.GetId()
+    isAvailable = false;
+    currentOrderId = order.GetId();
+
+    cout << "Курьер " << courierName << " (" << type << " №" << id
+        << ") взял заказ №" << order.GetId()
         << " по адресу: " << order.GetAddress() << endl;
 
     return true;
 }
 
-void Vehicle::CompleteDelivery(const Order& order)
+void Vehicle::CompleteDelivery()
 {
-    if (isAvailable) 
+    if (isAvailable || currentOrderId == -1)
     {
-        cout << "Предупреждение: транспорт № " << id << " и так свободен, он не выполнял доставку." << endl;
+        cout << "Предупреждение: транспорт № " << id << " свободный, на нем нет активных заказов." << endl;
         return;
     }
 
+    cout << "Курьер " << courierName << " завершил доставку заказа №" << currentOrderId << "." << endl;
     isAvailable = true;
-    cout << "Заказ номер " << order.GetId() << " успешно доставлен в район "
-        << order.GetDistrict() << ". Курьер " << courierName << " снова свободен." << endl;
+    currentOrderId = -1;
 }
 
 int Vehicle::GetId() const { return id; }
@@ -81,10 +84,11 @@ string Vehicle::GetType() const { return type; }
 double Vehicle::GetCapacity() const { return capacity; }
 string Vehicle::GetCourierName() const { return courierName; }
 bool Vehicle::GetIsAvailable() const { return isAvailable; }
+int Vehicle::GetCurrentOrderId() const { return currentOrderId; }
 
 void Vehicle::SetId(int newId) { id = newId; }
 
-void Vehicle::SetType(const string& newType) 
+void Vehicle::SetType(const string& newType)
 {
     if (!IsValidType(newType))
     {
@@ -120,7 +124,7 @@ void Vehicle::SetIsAvailable(bool newStatus) { isAvailable = newStatus; }
 
 string Vehicle::GetFullInfo() const
 {
-    string statusText = isAvailable ? "Свободен" : "Занят";
+    string statusText = isAvailable ? "Свободен" : ("Занят (Заказ №" + to_string(currentOrderId) + ")");
 
     return "Транспорт номер " + to_string(id) +
         " (" + type + ")" +
