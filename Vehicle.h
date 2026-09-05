@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 
+class Order; 
+
 class Vehicle
 {
 private:
@@ -12,6 +14,9 @@ private:
     bool isAvailable;
 public:
     Vehicle(int id, const std::string& type, double capacity, const std::string& courierName, bool isAvailable);
+
+    bool AssignOrder(const Order& order);
+    void CompleteDelivery(const Order& order);
 
     int GetId() const;
     std::string GetType() const;
