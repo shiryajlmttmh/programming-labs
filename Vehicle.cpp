@@ -11,7 +11,6 @@ bool Vehicle::IsValidType(const string& checkType) const
 double Vehicle::GetMaxCapacityForType(const string& checkType) const
 {
     if (checkType == "Мотоцикл") return MAX_MOTORCYCLE_CAPACITY;
-    if (checkType == "Машина") return MAX_CAR_CAPACITY;
     return MAX_CAR_CAPACITY; // дефолтный
 }
 
