@@ -58,8 +58,8 @@ bool Vehicle::AssignOrder(const Order& order)
     isAvailable = false;
     currentOrderId = order.GetId();
 
-    cout << "Курьер " << courierName << " (" << type << " №" << id
-        << ") взял заказ №" << order.GetId()
+    cout << "Курьер " << courierName << " (" << type << " номер " << id
+        << ") взял заказ номер " << order.GetId()
         << " по адресу: " << order.GetAddress() << endl;
 
     return true;
@@ -69,11 +69,11 @@ void Vehicle::CompleteDelivery()
 {
     if (isAvailable || currentOrderId == -1)
     {
-        cout << "Предупреждение: транспорт № " << id << " свободный, на нем нет активных заказов." << endl;
+        cout << "Предупреждение: транспорт номер " << id << " свободный, на нем нет активных заказов." << endl;
         return;
     }
 
-    cout << "Курьер " << courierName << " завершил доставку заказа №" << currentOrderId << "." << endl;
+    cout << "Курьер " << courierName << " завершил доставку заказа номер " << currentOrderId << "." << endl;
     isAvailable = true;
     currentOrderId = -1;
 }
@@ -123,7 +123,7 @@ void Vehicle::SetIsAvailable(bool newStatus) { isAvailable = newStatus; }
 
 string Vehicle::GetFullInfo() const
 {
-    string statusText = isAvailable ? "Свободен" : ("Занят (Заказ №" + to_string(currentOrderId) + ")");
+    string statusText = isAvailable ? "Свободен" : ("Занят (Заказ номер " + to_string(currentOrderId) + ")");
 
     return "Транспорт номер " + to_string(id) +
         " (" + type + ")" +

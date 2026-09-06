@@ -24,9 +24,9 @@ public:
     bool GetIsAssigned() const;
 
     void SetId(int newId);
-    void SetAddress(const string& newAddress);
+    void SetAddress(const std::string& newAddress);
     void SetWeight(double newWeight);
-    void SetDistrict(const string& newDistrict);
+    void SetDistrict(const std::string& newDistrict);
     void SetIsAssigned(bool status);
 
     std::string GetFullInfo() const;

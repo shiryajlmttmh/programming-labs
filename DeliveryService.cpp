@@ -53,7 +53,7 @@ bool DeliveryService::RemoveOrderById(int orderId)
 
     if (orders[index].GetIsAssigned())
     {
-        cout << "Ошибка: нельзя удалить заказ №" << orderId << ", так как он находится в процессе доставки!" << endl;
+        cout << "Ошибка: нельзя удалить заказ номер " << orderId << ", так как он находится в процессе доставки!" << endl;
         return false;
     }
 
