@@ -107,10 +107,7 @@ void Vehicle::SetType(const string& newType)
 void Vehicle::SetCapacity(double newCapacity)
 {
     double maxLimit = GetMaxCapacityForType(type);
-    if (newCapacity > 0 && newCapacity <= maxLimit)
-    {
-        capacity = newCapacity;
-    }
+    if (newCapacity > 0 && newCapacity <= maxLimit) capacity = newCapacity;
     else
     {
         cout << "Ошибка: Для типа " << type << " грузоподъемность должна быть от 0 до "

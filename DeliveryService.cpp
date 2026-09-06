@@ -6,20 +6,14 @@ void DeliveryService::PrintAllVehicles() const
 {
     cout << "\n--- Список транспорта ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
-    for (int i = 0; i < vehicles.size(); i++)
-    {
-        vehicles[i].PrintFullInfo();
-    }
+    for (int i = 0; i < vehicles.size(); i++) vehicles[i].PrintFullInfo();
 }
 
 void DeliveryService::PrintAllOrders() const
 {
     cout << "\n--- Список активных заказов ---" << endl;
     if (orders.empty()) { cout << "Список пуст." << endl; return; }
-    for (int i = 0; i < orders.size(); i++)
-    {
-        orders[i].PrintFullInfo();
-    }
+    for (int i = 0; i < orders.size(); i++) orders[i].PrintFullInfo();
 }
 
 void DeliveryService::AddVehicle(const Vehicle& vehicle)
@@ -86,18 +80,16 @@ int DeliveryService::FindOptimalVehicleIndex(double orderWeight) const
 int DeliveryService::FindVehicleIndexById(int id) const
 {
     for (int i = 0; i < vehicles.size(); i++)
-    {
         if (vehicles[i].GetId() == id) return i;
-    }
+
     return -1;
 }
 
 int DeliveryService::FindOrderIndexById(int id) const
 {
     for (int i = 0; i < orders.size(); i++)
-    {
         if (orders[i].GetId() == id) return i;
-    }
+    
     return -1;
 }
 
@@ -152,10 +144,7 @@ bool DeliveryService::CompleteDelivery(int vehicleId)
 
     vehicles[vehicleIndex].CompleteDelivery();
 
-    if (orderIndex != -1)
-    {
-        orders.erase(orders.begin() + orderIndex);
-    }
+    if (orderIndex != -1) orders.erase(orders.begin() + orderIndex);
 
     return true;
 }
