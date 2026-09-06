@@ -6,7 +6,7 @@ void DeliveryService::PrintAllVehicles() const
 {
     cout << "\n--- Список транспорта ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
-    for (size_t i = 0; i < vehicles.size(); i++)
+    for (int i = 0; i < vehicles.size(); i++)
     {
         vehicles[i].PrintFullInfo();
     }
@@ -16,7 +16,7 @@ void DeliveryService::PrintAllOrders() const
 {
     cout << "\n--- Список активных заказов ---" << endl;
     if (orders.empty()) { cout << "Список пуст." << endl; return; }
-    for (size_t i = 0; i < orders.size(); i++)
+    for (int i = 0; i < orders.size(); i++)
     {
         orders[i].PrintFullInfo();
     }
@@ -67,7 +67,7 @@ int DeliveryService::FindOptimalVehicleIndex(double orderWeight) const
     int vehicleIndex = -1;
     double minCapacity = 0;
 
-    for (size_t i = 0; i < vehicles.size(); i++)
+    for (int i = 0; i < vehicles.size(); i++)
     {
         double currCapacity = vehicles[i].GetCapacity();
         if (vehicles[i].GetIsAvailable() && currCapacity >= orderWeight)
@@ -75,7 +75,7 @@ int DeliveryService::FindOptimalVehicleIndex(double orderWeight) const
             if (vehicleIndex == -1 || currCapacity < minCapacity)
             {
                 minCapacity = currCapacity;
-                vehicleIndex = static_cast<int>(i);
+                vehicleIndex = i;
             }
         }
     }
@@ -85,18 +85,18 @@ int DeliveryService::FindOptimalVehicleIndex(double orderWeight) const
 
 int DeliveryService::FindVehicleIndexById(int id) const
 {
-    for (size_t i = 0; i < vehicles.size(); i++)
+    for (int i = 0; i < vehicles.size(); i++)
     {
-        if (vehicles[i].GetId() == id) return static_cast<int>(i);
+        if (vehicles[i].GetId() == id) return i;
     }
     return -1;
 }
 
 int DeliveryService::FindOrderIndexById(int id) const
 {
-    for (size_t i = 0; i < orders.size(); i++)
+    for (int i = 0; i < orders.size(); i++)
     {
-        if (orders[i].GetId() == id) return static_cast<int>(i);
+        if (orders[i].GetId() == id) return i;
     }
     return -1;
 }
