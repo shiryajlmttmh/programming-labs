@@ -9,11 +9,11 @@ Order::Order(int id, const string& address, double weight, const string& distric
     this->district = district;
     this->is_assigned = false;
 
-    if (weight < min_weight || weight > max_weight)
+    if (weight < MIN_WEIGHT || weight > MAX_WEIGHT)
     {
         cout << "Предупреждение: Некорректный вес заказа (" << weight
-            << " кг). Установлен вес по умолчанию: " << min_weight << " кг." << endl;
-        this->weight = min_weight;
+            << " кг). Установлен вес по умолчанию: " << MIN_WEIGHT << " кг." << endl;
+        this->weight = MIN_WEIGHT;
     }
     else this->weight = weight;
 }
@@ -29,10 +29,10 @@ void Order::set_address(const string& new_address) { address = new_address; }
 
 void Order::set_weight(double new_weight)
 {
-    if (new_weight < min_weight || new_weight > max_weight)
+    if (new_weight < MIN_WEIGHT || new_weight > MAX_WEIGHT)
     {
-        cout << "Ошибка: Вес заказа должен быть от " << min_weight
-            << " до " << max_weight << " кг!" << endl;
+        cout << "Ошибка: Вес заказа должен быть от " << MIN_WEIGHT
+            << " до " << MAX_WEIGHT << " кг!" << endl;
     }
     else weight = new_weight;
 }

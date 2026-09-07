@@ -10,8 +10,8 @@ bool Vehicle::is_valid_type(const string& check_type) const
 
 double Vehicle::get_max_capacity_for_type(const string& check_type) const
 {
-    if (check_type == "Мотоцикл") return max_motorcycle_capacity;
-    return max_car_capacity;
+    if (check_type == "Мотоцикл") return MAX_MOTORCYCLE_CAPACITY;
+    return MAX_CAR_CAPACITY;
 }
 
 Vehicle::Vehicle(int id, const string& type, double capacity, const string& courier_name, bool is_available)
