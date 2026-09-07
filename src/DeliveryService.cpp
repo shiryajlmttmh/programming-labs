@@ -2,149 +2,149 @@
 
 using namespace std;
 
-void DeliveryService::PrintAllVehicles() const
+void DeliveryService::print_all_vehicles() const
 {
     cout << "\n--- Список транспорта ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
-    for (int i = 0; i < vehicles.size(); i++) vehicles[i].PrintFullInfo();
+    for (int i = 0; i < vehicles.size(); i++) vehicles[i].print_full_info();
 }
 
-void DeliveryService::PrintAllOrders() const
+void DeliveryService::print_all_orders() const
 {
     cout << "\n--- Список активных заказов ---" << endl;
     if (orders.empty()) { cout << "Список пуст." << endl; return; }
-    for (int i = 0; i < orders.size(); i++) orders[i].PrintFullInfo();
+    for (int i = 0; i < orders.size(); i++) orders[i].print_full_info();
 }
 
-void DeliveryService::AddVehicle(const Vehicle& vehicle)
+void DeliveryService::add_vehicle(const Vehicle& vehicle)
 {
-    if (FindVehicleIndexById(vehicle.GetId()) != -1)
+    if (find_vehicle_index_by_id(vehicle.get_id()) != -1)
     {
-        cout << "Ошибка: транспорт с ID " << vehicle.GetId() << " уже существует!" << endl;
+        cout << "Ошибка: транспорт с ID " << vehicle.get_id() << " уже существует!" << endl;
         return;
     }
     vehicles.push_back(vehicle);
 }
 
-void DeliveryService::AddOrder(const Order& order)
+void DeliveryService::add_order(const Order& order)
 {
-    if (FindOrderIndexById(order.GetId()) != -1)
+    if (find_order_index_by_id(order.get_id()) != -1)
     {
-        cout << "Ошибка: заказ с ID " << order.GetId() << " уже существует!" << endl;
+        cout << "Ошибка: заказ с ID " << order.get_id() << " уже существует!" << endl;
         return;
     }
     orders.push_back(order);
 }
 
-bool DeliveryService::RemoveOrderById(int orderId)
+bool DeliveryService::remove_order_by_id(int order_id)
 {
-    int index = FindOrderIndexById(orderId);
+    int index = find_order_index_by_id(order_id);
     if (index == -1)
     {
-        cout << "Ошибка: заказ с номером " << orderId << " не найден!" << endl;
+        cout << "Ошибка: заказ с номером " << order_id << " не найден!" << endl;
         return false;
     }
 
-    if (orders[index].GetIsAssigned())
+    if (orders[index].get_is_assigned())
     {
-        cout << "Ошибка: нельзя удалить заказ номер " << orderId << ", так как он находится в процессе доставки!" << endl;
+        cout << "Ошибка: нельзя удалить заказ номер " << order_id << ", так как он находится в процессе доставки!" << endl;
         return false;
     }
 
     orders.erase(orders.begin() + index);
-    cout << "Заказ номер " << orderId << " успешно удален из системы." << endl;
+    cout << "Заказ номер " << order_id << " успешно удален из системы." << endl;
     return true;
 }
 
-int DeliveryService::FindOptimalVehicleIndex(double orderWeight) const
+int DeliveryService::find_optimal_vehicle_index(double order_weight) const
 {
-    int vehicleIndex = -1;
-    double minCapacity = 0;
+    int vehicle_index = -1;
+    double min_capacity = 0;
 
     for (int i = 0; i < vehicles.size(); i++)
     {
-        double currCapacity = vehicles[i].GetCapacity();
-        if (vehicles[i].GetIsAvailable() && currCapacity >= orderWeight)
+        double curr_capacity = vehicles[i].get_capacity();
+        if (vehicles[i].get_is_available() && curr_capacity >= order_weight)
         {
-            if (vehicleIndex == -1 || currCapacity < minCapacity)
+            if (vehicle_index == -1 || curr_capacity < min_capacity)
             {
-                minCapacity = currCapacity;
-                vehicleIndex = i;
+                min_capacity = curr_capacity;
+                vehicle_index = i;
             }
         }
     }
 
-    return vehicleIndex;
+    return vehicle_index;
 }
 
-int DeliveryService::FindVehicleIndexById(int id) const
+int DeliveryService::find_vehicle_index_by_id(int id) const
 {
     for (int i = 0; i < vehicles.size(); i++)
-        if (vehicles[i].GetId() == id) return i;
+        if (vehicles[i].get_id() == id) return i;
 
     return -1;
 }
 
-int DeliveryService::FindOrderIndexById(int id) const
+int DeliveryService::find_order_index_by_id(int id) const
 {
     for (int i = 0; i < orders.size(); i++)
-        if (orders[i].GetId() == id) return i;
-    
+        if (orders[i].get_id() == id) return i;
+
     return -1;
 }
 
-bool DeliveryService::AssignOrderToVehicle(int orderId)
+bool DeliveryService::assign_order_to_vehicle(int order_id)
 {
-    int orderIndex = FindOrderIndexById(orderId);
-    if (orderIndex == -1)
+    int order_index = find_order_index_by_id(order_id);
+    if (order_index == -1)
     {
-        cout << "Ошибка: заказ с ID " << orderId << " не найден в системе!" << endl;
+        cout << "Ошибка: заказ с ID " << order_id << " не найден в системе!" << endl;
         return false;
     }
 
-    if (orders[orderIndex].GetIsAssigned())
+    if (orders[order_index].get_is_assigned())
     {
-        cout << "Ошибка: заказ номер " << orderId << " уже назначен на другой транспорт!" << endl;
+        cout << "Ошибка: заказ номер " << order_id << " уже назначен на другой транспорт!" << endl;
         return false;
     }
 
-    int vehicleIndex = FindOptimalVehicleIndex(orders[orderIndex].GetWeight());
-    if (vehicleIndex == -1)
+    int vehicle_index = find_optimal_vehicle_index(orders[order_index].get_weight());
+    if (vehicle_index == -1)
     {
-        cout << "Ошибка: для заказа номер " << orderId << " нет подходящего свободного транспорта!" << endl;
+        cout << "Ошибка: для заказа номер " << order_id << " нет подходящего свободного транспорта!" << endl;
         return false;
     }
 
-    if (vehicles[vehicleIndex].AssignOrder(orders[orderIndex]))
+    if (vehicles[vehicle_index].assign_order(orders[order_index]))
     {
-        orders[orderIndex].SetIsAssigned(true);
+        orders[order_index].set_is_assigned(true);
         return true;
     }
 
     return false;
 }
 
-bool DeliveryService::CompleteDelivery(int vehicleId)
+bool DeliveryService::complete_delivery(int vehicle_id)
 {
-    int vehicleIndex = FindVehicleIndexById(vehicleId);
-    if (vehicleIndex == -1)
+    int vehicle_index = find_vehicle_index_by_id(vehicle_id);
+    if (vehicle_index == -1)
     {
-        cout << "Ошибка: транспорт с ID " << vehicleId << " не найден!" << endl;
+        cout << "Ошибка: транспорт с ID " << vehicle_id << " не найден!" << endl;
         return false;
     }
 
-    int orderId = vehicles[vehicleIndex].GetCurrentOrderId();
-    if (orderId == -1)
+    int order_id = vehicles[vehicle_index].get_current_order_id();
+    if (order_id == -1)
     {
-        cout << "Ошибка: транспорт с ID " << vehicleId << " сейчас не выполняет никаких заказов!" << endl;
+        cout << "Ошибка: транспорт с ID " << vehicle_id << " сейчас не выполняет никаких заказов!" << endl;
         return false;
     }
 
-    int orderIndex = FindOrderIndexById(orderId);
+    int order_index = find_order_index_by_id(order_id);
 
-    vehicles[vehicleIndex].CompleteDelivery();
+    vehicles[vehicle_index].complete_delivery();
 
-    if (orderIndex != -1) orders.erase(orders.begin() + orderIndex);
+    if (order_index != -1) orders.erase(orders.begin() + order_index);
 
     return true;
 }

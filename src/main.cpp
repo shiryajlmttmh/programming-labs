@@ -5,15 +5,15 @@
 
 using namespace std;
 
-void ClearBuffer();
-int ReadInt(const string& prompt);
-double ReadDouble(const string& prompt);
-void SeedData(DeliveryService& service);
-void PrintMenu();
-void HandleAddVehicle(DeliveryService& service);
-void HandleAddOrder(DeliveryService& service);
-void HandleAssignOrder(DeliveryService& service);
-void HandleCompleteDelivery(DeliveryService& service);
+void clear_buffer();
+int read_int(const string& prompt);
+double read_double(const string& prompt);
+void seed_data(DeliveryService& service);
+void print_menu();
+void handle_add_vehicle(DeliveryService& service);
+void handle_add_order(DeliveryService& service);
+void handle_assign_order(DeliveryService& service);
+void handle_complete_delivery(DeliveryService& service);
 
 int main()
 {
@@ -21,34 +21,34 @@ int main()
     SetConsoleOutputCP(65001);
 
     DeliveryService service;
-    SeedData(service);
+    seed_data(service);
 
-    PrintMenu();
+    print_menu();
 
     int choice = -1;
     while (choice != 0)
     {
-        choice = ReadInt("Выберите действие: ");
+        choice = read_int("Выберите действие: ");
 
         switch (choice)
         {
         case 1:
-            HandleAddVehicle(service);
+            handle_add_vehicle(service);
             break;
         case 2:
-            HandleAddOrder(service);
+            handle_add_order(service);
             break;
         case 3:
-            service.PrintAllVehicles();
+            service.print_all_vehicles();
             break;
         case 4:
-            service.PrintAllOrders();
+            service.print_all_orders();
             break;
         case 5:
-            HandleAssignOrder(service);
+            handle_assign_order(service);
             break;
         case 6:
-            HandleCompleteDelivery(service);
+            handle_complete_delivery(service);
             break;
         case 0:
             cout << "Завершение работы." << endl;
@@ -61,12 +61,12 @@ int main()
     return 0;
 }
 
-void ClearBuffer()
+void clear_buffer()
 {
     while (cin.get() != '\n' && cin);
 }
 
-int ReadInt(const string& prompt)
+int read_int(const string& prompt)
 {
     int value;
     while (true)
@@ -74,20 +74,20 @@ int ReadInt(const string& prompt)
         cout << prompt;
         if (cin >> value)
         {
-            char nextChar = cin.get();
+            char next_char = cin.get();
 
-            while (nextChar == ' ' || nextChar == '\t') nextChar = cin.get();
+            while (next_char == ' ' || next_char == '\t') next_char = cin.get();
 
-            if (nextChar == '\n' || nextChar == EOF) return value;
+            if (next_char == '\n' || next_char == EOF) return value;
         }
         else cin.clear();
 
-        ClearBuffer();
+        clear_buffer();
         cout << "Ошибка: введите корректное целое число без посторонних символов!" << endl;
     }
 }
 
-double ReadDouble(const string& prompt)
+double read_double(const string& prompt)
 {
     double value;
     while (true)
@@ -95,32 +95,32 @@ double ReadDouble(const string& prompt)
         cout << prompt;
         if (cin >> value)
         {
-            char nextChar = cin.get();
+            char next_char = cin.get();
 
-            while (nextChar == ' ' || nextChar == '\t') nextChar = cin.get();
+            while (next_char == ' ' || next_char == '\t') next_char = cin.get();
 
-            if (nextChar == '\n' || nextChar == EOF) return value;
+            if (next_char == '\n' || next_char == EOF) return value;
         }
         else cin.clear();
 
-        ClearBuffer();
+        clear_buffer();
         cout << "Ошибка: введите корректное число без посторонних символов!" << endl;
     }
 }
 
-void SeedData(DeliveryService& service)
+void seed_data(DeliveryService& service)
 {
-    service.AddVehicle(Vehicle(1, "Мотоцикл", 30.0, "Иван", true));
-    service.AddVehicle(Vehicle(2, "Машина", 500.0, "Алексей", true));
-    service.AddVehicle(Vehicle(3, "Машина", 1200.0, "Дмитрий", true));
+    service.add_vehicle(Vehicle(1, "Мотоцикл", 30.0, "Иван", true));
+    service.add_vehicle(Vehicle(2, "Машина", 500.0, "Алексей", true));
+    service.add_vehicle(Vehicle(3, "Машина", 1200.0, "Дмитрий", true));
 
-    service.AddOrder(Order(101, "ул. Ленина, 5", 15.0, "Центральный"));
-    service.AddOrder(Order(102, "пр. Мира, 12", 250.0, "Северный"));
+    service.add_order(Order(101, "ул. Ленина, 5", 15.0, "Центральный"));
+    service.add_order(Order(102, "пр. Мира, 12", 250.0, "Северный"));
 
     cout << "Тестовые данные успешно загружены!" << endl;
 }
 
-void PrintMenu()
+void print_menu()
 {
     cout << "\n--- МЕНЮ СЛУЖБЫ ДОСТАВКИ ---" << endl;
     cout << "1. Добавить транспорт вручную\n"
@@ -132,50 +132,50 @@ void PrintMenu()
         << "0. Выход\n";
 }
 
-void HandleAddVehicle(DeliveryService& service)
+void handle_add_vehicle(DeliveryService& service)
 {
-    int id = ReadInt("Введите ID транспорта: ");
+    int id = read_int("Введите ID транспорта: ");
 
     cout << "Введите тип (Мотоцикл/Машина): ";
     string type;
     getline(cin, type);
 
-    double capacity = ReadDouble("Введите грузоподъемность (кг): ");
+    double capacity = read_double("Введите грузоподъемность (кг): ");
 
     cout << "Введите имя курьера: ";
     string courier;
     getline(cin, courier);
 
-    service.AddVehicle(Vehicle(id, type, capacity, courier, true));
+    service.add_vehicle(Vehicle(id, type, capacity, courier, true));
     cout << "Успех: транспорт добавлен в систему." << endl;
 }
 
-void HandleAddOrder(DeliveryService& service)
+void handle_add_order(DeliveryService& service)
 {
-    int id = ReadInt("Введите ID заказа: ");
+    int id = read_int("Введите ID заказа: ");
 
     cout << "Введите адрес: ";
     string address;
     getline(cin, address);
 
-    double weight = ReadDouble("Введите вес (кг): ");
+    double weight = read_double("Введите вес (кг): ");
 
     cout << "Введите район: ";
     string district;
     getline(cin, district);
 
-    service.AddOrder(Order(id, address, weight, district));
+    service.add_order(Order(id, address, weight, district));
     cout << "Успех: заказ добавлен в систему." << endl;
 }
 
-void HandleAssignOrder(DeliveryService& service)
+void handle_assign_order(DeliveryService& service)
 {
-    int orderId = ReadInt("Введите ID заказа: ");
-    service.AssignOrderToVehicle(orderId);
+    int order_id = read_int("Введите ID заказа: ");
+    service.assign_order_to_vehicle(order_id);
 }
 
-void HandleCompleteDelivery(DeliveryService& service)
+void handle_complete_delivery(DeliveryService& service)
 {
-    int vehicleId = ReadInt("Введите ID транспорта, завершившего доставку: ");
-    service.CompleteDelivery(vehicleId);
+    int vehicle_id = read_int("Введите ID транспорта, завершившего доставку: ");
+    service.complete_delivery(vehicle_id);
 }

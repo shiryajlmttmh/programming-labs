@@ -3,25 +3,25 @@
 
 using namespace std;
 
-bool Vehicle::IsValidType(const string& checkType) const
+bool Vehicle::is_valid_type(const string& check_type) const
 {
-    return (checkType == "Мотоцикл" || checkType == "Машина");
+    return (check_type == "Мотоцикл" || check_type == "Машина");
 }
 
-double Vehicle::GetMaxCapacityForType(const string& checkType) const
+double Vehicle::get_max_capacity_for_type(const string& check_type) const
 {
-    if (checkType == "Мотоцикл") return MAX_MOTORCYCLE_CAPACITY;
-    return MAX_CAR_CAPACITY; // дефолтный
+    if (check_type == "Мотоцикл") return max_motorcycle_capacity;
+    return max_car_capacity;
 }
 
-Vehicle::Vehicle(int id, const string& type, double capacity, const string& courierName, bool isAvailable)
+Vehicle::Vehicle(int id, const string& type, double capacity, const string& courier_name, bool is_available)
 {
     this->id = id;
-    this->courierName = courierName;
-    this->isAvailable = isAvailable;
-    this->currentOrderId = -1;
+    this->courier_name = courier_name;
+    this->is_available = is_available;
+    this->current_order_id = -1;
 
-    if (IsValidType(type)) this->type = type;
+    if (is_valid_type(type)) this->type = type;
     else
     {
         cout << "Предупреждение: Неизвестный тип транспорта '" << type
@@ -29,107 +29,107 @@ Vehicle::Vehicle(int id, const string& type, double capacity, const string& cour
         this->type = "Машина";
     }
 
-    double maxLimit = GetMaxCapacityForType(this->type);
-    if (capacity <= 0 || capacity > maxLimit)
+    double max_limit = get_max_capacity_for_type(this->type);
+    if (capacity <= 0 || capacity > max_limit)
     {
         cout << "Предупреждение: Некорректная грузоподъемность (" << capacity
             << " кг) для типа " << this->type
-            << ". Установлено максимальное значение: " << maxLimit << " кг." << endl;
-        this->capacity = maxLimit;
+            << ". Установлено максимальное значение: " << max_limit << " кг." << endl;
+        this->capacity = max_limit;
     }
     else this->capacity = capacity;
 }
 
-bool Vehicle::AssignOrder(const Order& order)
+bool Vehicle::assign_order(const Order& order)
 {
-    if (!isAvailable)
+    if (!is_available)
     {
-        cout << "Ошибка: транспорт номер " << id << " (" << courierName << ") уже занят!" << endl;
+        cout << "Ошибка: транспорт номер " << id << " (" << courier_name << ") уже занят!" << endl;
         return false;
     }
 
-    if (order.GetWeight() > capacity)
+    if (order.get_weight() > capacity)
     {
-        cout << "Ошибка: вес заказа номер " << order.GetId() << " (" << order.GetWeight()
+        cout << "Ошибка: вес заказа номер " << order.get_id() << " (" << order.get_weight()
             << " кг) превышает грузоподъемность транспорта (" << capacity << " кг)!" << endl;
         return false;
     }
 
-    isAvailable = false;
-    currentOrderId = order.GetId();
+    is_available = false;
+    current_order_id = order.get_id();
 
-    cout << "Курьер " << courierName << " (" << type << " номер " << id
-        << ") взял заказ номер " << order.GetId()
-        << " по адресу: " << order.GetAddress() << endl;
+    cout << "Курьер " << courier_name << " (" << type << " номер " << id
+        << ") взял заказ номер " << order.get_id()
+        << " по адресу: " << order.get_address() << endl;
 
     return true;
 }
 
-void Vehicle::CompleteDelivery()
+void Vehicle::complete_delivery()
 {
-    if (isAvailable || currentOrderId == -1)
+    if (is_available || current_order_id == -1)
     {
         cout << "Предупреждение: транспорт номер " << id << " свободный, на нем нет активных заказов." << endl;
         return;
     }
 
-    cout << "Курьер " << courierName << " завершил доставку заказа номер " << currentOrderId << "." << endl;
-    isAvailable = true;
-    currentOrderId = -1;
+    cout << "Курьер " << courier_name << " завершил доставку заказа номер " << current_order_id << "." << endl;
+    is_available = true;
+    current_order_id = -1;
 }
 
-int Vehicle::GetId() const { return id; }
-string Vehicle::GetType() const { return type; }
-double Vehicle::GetCapacity() const { return capacity; }
-string Vehicle::GetCourierName() const { return courierName; }
-bool Vehicle::GetIsAvailable() const { return isAvailable; }
-int Vehicle::GetCurrentOrderId() const { return currentOrderId; }
+int Vehicle::get_id() const { return id; }
+string Vehicle::get_type() const { return type; }
+double Vehicle::get_capacity() const { return capacity; }
+string Vehicle::get_courier_name() const { return courier_name; }
+bool Vehicle::get_is_available() const { return is_available; }
+int Vehicle::get_current_order_id() const { return current_order_id; }
 
-void Vehicle::SetId(int newId) { id = newId; }
+void Vehicle::set_id(int new_id) { id = new_id; }
 
-void Vehicle::SetType(const string& newType)
+void Vehicle::set_type(const string& new_type)
 {
-    if (!IsValidType(newType))
+    if (!is_valid_type(new_type))
     {
         cout << "Ошибка: Разрешены только типы 'Мотоцикл' и 'Машина'!" << endl;
         return;
     }
 
-    type = newType;
-    double maxLimit = GetMaxCapacityForType(type);
-    if (capacity > maxLimit)
+    type = new_type;
+    double max_limit = get_max_capacity_for_type(type);
+    if (capacity > max_limit)
     {
-        capacity = maxLimit;
+        capacity = max_limit;
         cout << "Грузоподъемность скорректирована под новый тип: " << capacity << " кг." << endl;
     }
 }
 
-void Vehicle::SetCapacity(double newCapacity)
+void Vehicle::set_capacity(double new_capacity)
 {
-    double maxLimit = GetMaxCapacityForType(type);
-    if (newCapacity > 0 && newCapacity <= maxLimit) capacity = newCapacity;
+    double max_limit = get_max_capacity_for_type(type);
+    if (new_capacity > 0 && new_capacity <= max_limit) capacity = new_capacity;
     else
     {
         cout << "Ошибка: Для типа " << type << " грузоподъемность должна быть от 0 до "
-            << maxLimit << " кг!" << endl;
+            << max_limit << " кг!" << endl;
     }
 }
 
-void Vehicle::SetCourierName(const string& newCourierName) { courierName = newCourierName; }
-void Vehicle::SetIsAvailable(bool newStatus) { isAvailable = newStatus; }
+void Vehicle::set_courier_name(const string& new_courier_name) { courier_name = new_courier_name; }
+void Vehicle::set_is_available(bool new_status) { is_available = new_status; }
 
-string Vehicle::GetFullInfo() const
+string Vehicle::get_full_info() const
 {
-    string statusText = isAvailable ? "Свободен" : ("Занят (Заказ номер " + to_string(currentOrderId) + ")");
+    string status_text = is_available ? "Свободен" : ("Занят (Заказ номер " + to_string(current_order_id) + ")");
 
     return "Транспорт номер " + to_string(id) +
         " (" + type + ")" +
-        ". Курьер: " + courierName +
+        ". Курьер: " + courier_name +
         ". Грузоподъемность: " + to_string(capacity) + " кг" +
-        ". Статус: " + statusText;
+        ". Статус: " + status_text;
 }
 
-void Vehicle::PrintFullInfo() const
+void Vehicle::print_full_info() const
 {
-    cout << GetFullInfo() << endl;
+    cout << get_full_info() << endl;
 }

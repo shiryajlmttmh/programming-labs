@@ -10,16 +10,16 @@ private:
     std::vector<Vehicle> vehicles;
     std::vector<Order> orders;
 
-    int FindVehicleIndexById(int id) const;
-    int FindOrderIndexById(int id) const;
-    int FindOptimalVehicleIndex(double orderWeight) const;
+    int find_vehicle_index_by_id(int id) const;
+    int find_order_index_by_id(int id) const;
+    int find_optimal_vehicle_index(double order_weight) const;
 
 public:
-    void PrintAllVehicles() const;
-    void PrintAllOrders() const;
-    void AddVehicle(const Vehicle& vehicle);
-    void AddOrder(const Order& order);
-    bool AssignOrderToVehicle(int orderId);
-    bool RemoveOrderById(int orderId);
-    bool CompleteDelivery(int vehicleId);
+    void print_all_vehicles() const;
+    void print_all_orders() const;
+    void add_vehicle(const Vehicle& vehicle);
+    void add_order(const Order& order);
+    bool assign_order_to_vehicle(int order_id);
+    bool remove_order_by_id(int order_id);
+    bool complete_delivery(int vehicle_id);
 };

@@ -7,50 +7,50 @@ Order::Order(int id, const string& address, double weight, const string& distric
     this->id = id;
     this->address = address;
     this->district = district;
-    this->isAssigned = false;
+    this->is_assigned = false;
 
-    if (weight < MIN_WEIGHT || weight > MAX_WEIGHT)
+    if (weight < min_weight || weight > max_weight)
     {
         cout << "Предупреждение: Некорректный вес заказа (" << weight
-            << " кг). Установлен вес по умолчанию: " << MIN_WEIGHT << " кг." << endl;
-        this->weight = MIN_WEIGHT;
+            << " кг). Установлен вес по умолчанию: " << min_weight << " кг." << endl;
+        this->weight = min_weight;
     }
     else this->weight = weight;
 }
 
-int Order::GetId() const { return id; }
-string Order::GetAddress() const { return address; }
-double Order::GetWeight() const { return weight; }
-string Order::GetDistrict() const { return district; }
-bool Order::GetIsAssigned() const { return isAssigned; }
+int Order::get_id() const { return id; }
+string Order::get_address() const { return address; }
+double Order::get_weight() const { return weight; }
+string Order::get_district() const { return district; }
+bool Order::get_is_assigned() const { return is_assigned; }
 
-void Order::SetId(int newId) { id = newId; }
-void Order::SetAddress(const string& newAddress) { address = newAddress; }
+void Order::set_id(int new_id) { id = new_id; }
+void Order::set_address(const string& new_address) { address = new_address; }
 
-void Order::SetWeight(double newWeight)
+void Order::set_weight(double new_weight)
 {
-    if (newWeight < MIN_WEIGHT || newWeight > MAX_WEIGHT)
+    if (new_weight < min_weight || new_weight > max_weight)
     {
-        cout << "Ошибка: Вес заказа должен быть от " << MIN_WEIGHT
-            << " до " << MAX_WEIGHT << " кг!" << endl;
+        cout << "Ошибка: Вес заказа должен быть от " << min_weight
+            << " до " << max_weight << " кг!" << endl;
     }
-    else weight = newWeight;
+    else weight = new_weight;
 }
 
-void Order::SetDistrict(const string& newDistrict) { district = newDistrict; }
-void Order::SetIsAssigned(bool status) { isAssigned = status; }
+void Order::set_district(const string& new_district) { district = new_district; }
+void Order::set_is_assigned(bool status) { is_assigned = status; }
 
-string Order::GetFullInfo() const
+string Order::get_full_info() const
 {
-    string statusText = isAssigned ? "Доставляется" : "Ожидает назначения";
+    string status_text = is_assigned ? "Доставляется" : "Ожидает назначения";
     return "Заказ номер " + to_string(id) +
         ". Адрес: " + address +
         ". Район: " + district +
         ". Вес: " + to_string(weight) + " кг" +
-        ". Статус: " + statusText;
+        ". Статус: " + status_text;
 }
 
-void Order::PrintFullInfo() const
+void Order::print_full_info() const
 {
-    cout << GetFullInfo() << endl;
+    cout << get_full_info() << endl;
 }
