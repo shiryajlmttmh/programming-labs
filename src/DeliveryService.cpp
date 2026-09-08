@@ -16,24 +16,26 @@ void DeliveryService::print_all_orders() const
     for (int i = 0; i < orders.size(); i++) orders[i].print_full_info();
 }
 
-void DeliveryService::add_vehicle(const Vehicle& vehicle)
+bool DeliveryService::add_vehicle(const Vehicle& vehicle)
 {
     if (find_vehicle_index_by_id(vehicle.get_id()) != -1)
     {
         cout << "Ошибка: транспорт с ID " << vehicle.get_id() << " уже существует!" << endl;
-        return;
+        return false;
     }
     vehicles.push_back(vehicle);
+    return true;
 }
 
-void DeliveryService::add_order(const Order& order)
+bool DeliveryService::add_order(const Order& order)
 {
     if (find_order_index_by_id(order.get_id()) != -1)
     {
         cout << "Ошибка: заказ с ID " << order.get_id() << " уже существует!" << endl;
-        return;
+        return false;
     }
     orders.push_back(order);
+    return true;
 }
 
 bool DeliveryService::remove_order_by_id(int order_id)

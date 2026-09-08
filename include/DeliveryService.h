@@ -17,8 +17,8 @@ private:
 public:
     void print_all_vehicles() const;
     void print_all_orders() const;
-    void add_vehicle(const Vehicle& vehicle);
-    void add_order(const Order& order);
+    bool add_vehicle(const Vehicle& vehicle);
+    bool add_order(const Order& order);
     bool assign_order_to_vehicle(int order_id);
     bool remove_order_by_id(int order_id);
     bool complete_delivery(int vehicle_id);

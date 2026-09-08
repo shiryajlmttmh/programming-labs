@@ -146,8 +146,10 @@ void handle_add_vehicle(DeliveryService& service)
     string courier;
     getline(cin, courier);
 
-    service.add_vehicle(Vehicle(id, type, capacity, courier, true));
-    cout << "Успех: транспорт добавлен в систему." << endl;
+    if (service.add_vehicle(Vehicle(id, type, capacity, courier, true)))
+    {
+        cout << "Успех: транспорт добавлен в систему." << endl;
+    }
 }
 
 void handle_add_order(DeliveryService& service)
@@ -164,8 +166,10 @@ void handle_add_order(DeliveryService& service)
     string district;
     getline(cin, district);
 
-    service.add_order(Order(id, address, weight, district));
-    cout << "Успех: заказ добавлен в систему." << endl;
+    if (service.add_order(Order(id, address, weight, district)))
+    {
+        cout << "Успех: заказ добавлен в систему." << endl;
+    }
 }
 
 void handle_assign_order(DeliveryService& service)
