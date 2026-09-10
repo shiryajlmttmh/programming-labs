@@ -150,3 +150,27 @@ bool DeliveryService::complete_delivery(int vehicle_id)
 
     return true;
 }
+
+Vehicle* DeliveryService::get_vehicle(int id)
+{
+    int index = find_vehicle_index_by_id(id);
+    if (index != -1) return &vehicles[index];
+    return nullptr;
+}
+
+Order* DeliveryService::get_order(int id)
+{
+    int index = find_order_index_by_id(id);
+    if (index != -1) return &orders[index];
+    return nullptr;
+}
+
+bool DeliveryService::check_vehicle_exists(int id) const
+{
+    return find_vehicle_index_by_id(id) != -1;
+}
+
+bool DeliveryService::check_order_exists(int id) const
+{
+    return find_order_index_by_id(id) != -1;
+}

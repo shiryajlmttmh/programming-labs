@@ -22,4 +22,9 @@ public:
     bool assign_order_to_vehicle(int order_id);
     bool remove_order_by_id(int order_id);
     bool complete_delivery(int vehicle_id);
+
+    Vehicle* get_vehicle(int id);
+    Order* get_order(int id);
+    bool check_vehicle_exists(int id) const;
+    bool check_order_exists(int id) const;
 };
