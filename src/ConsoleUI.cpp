@@ -20,16 +20,16 @@ static void handle_manage_order(DeliveryService& service);
 static void handle_assign_order(DeliveryService& service);
 static void handle_complete_delivery(DeliveryService& service);
 
-static void handle_change_vehicle_id(DeliveryService& service, Vehicle* v);
-static void handle_change_vehicle_type(Vehicle* v);
-static void handle_change_vehicle_capacity(Vehicle* v);
-static void handle_change_vehicle_courier(Vehicle* v);
-static void handle_change_vehicle_status(Vehicle* v);
+static void handle_change_vehicle_id(DeliveryService& service, Vehicle* vehicle);
+static void handle_change_vehicle_type(Vehicle* vehicle);
+static void handle_change_vehicle_capacity(Vehicle* vehicle);
+static void handle_change_vehicle_courier(Vehicle* vehicle);
+static void handle_change_vehicle_status(Vehicle* vehicle);
 
-static void handle_change_order_id(DeliveryService& service, Order* o);
-static void handle_change_order_address(Order* o);
-static void handle_change_order_weight(Order* o);
-static void handle_change_order_district(Order* o);
+static void handle_change_order_id(DeliveryService& service, Order* order);
+static void handle_change_order_address(Order* order);
+static void handle_change_order_weight(Order* order);
+static void handle_change_order_district(Order* order);
 
 void run_delivery_app()
 {
@@ -172,9 +172,9 @@ static void handle_add_order(DeliveryService& service)
 static void handle_manage_vehicle(DeliveryService& service)
 {
     int id = read_int("Введите ID транспорта для управления: ");
-    Vehicle* v = service.get_vehicle(id);
+    Vehicle* vehicle = service.get_vehicle(id);
 
-    if (!v)
+    if (!vehicle)
     {
         cout << "Ошибка: транспорт с таким ID не найден!" << endl;
         return;
@@ -183,23 +183,23 @@ static void handle_manage_vehicle(DeliveryService& service)
     int choice = -1;
     while (choice != 0)
     {
-        print_manage_vehicle_menu(v->get_id());
+        print_manage_vehicle_menu(vehicle->get_id());
         choice = read_int("Выберите действие: ");
 
         switch (choice)
         {
-        case 1: v->print_full_info(); break;
-        case 2: cout << "ID транспорта: " << v->get_id() << endl; break;
-        case 3: cout << "Тип транспорта: " << v->get_type() << endl; break;
-        case 4: cout << "Грузоподъемность: " << v->get_capacity() << " кг" << endl; break;
-        case 5: cout << "Имя курьера: " << v->get_courier_name() << endl; break;
-        case 6: cout << "Статус доступности: " << (v->get_is_available() ? "Свободен" : "Недоступен / Занят") << endl; break;
+        case 1: vehicle->print_full_info(); break;
+        case 2: cout << "ID транспорта: " << vehicle->get_id() << endl; break;
+        case 3: cout << "Тип транспорта: " << vehicle->get_type() << endl; break;
+        case 4: cout << "Грузоподъемность: " << vehicle->get_capacity() << " кг" << endl; break;
+        case 5: cout << "Имя курьера: " << vehicle->get_courier_name() << endl; break;
+        case 6: cout << "Статус доступности: " << (vehicle->get_is_available() ? "Свободен" : "Недоступен / Занят") << endl; break;
 
-        case 7:  handle_change_vehicle_id(service, v); break;
-        case 8:  handle_change_vehicle_type(v); break;
-        case 9:  handle_change_vehicle_capacity(v); break;
-        case 10: handle_change_vehicle_courier(v); break;
-        case 11: handle_change_vehicle_status(v); break;
+        case 7:  handle_change_vehicle_id(service, vehicle); break;
+        case 8:  handle_change_vehicle_type(vehicle); break;
+        case 9:  handle_change_vehicle_capacity(vehicle); break;
+        case 10: handle_change_vehicle_courier(vehicle); break;
+        case 11: handle_change_vehicle_status(vehicle); break;
         case 0:  break;
         default: cout << "Неверный пункт меню!" << endl;
         }
@@ -209,9 +209,9 @@ static void handle_manage_vehicle(DeliveryService& service)
 static void handle_manage_order(DeliveryService& service)
 {
     int id = read_int("Введите ID заказа для управления: ");
-    Order* o = service.get_order(id);
+    Order* order = service.get_order(id);
 
-    if (!o)
+    if (!order)
     {
         cout << "Ошибка: заказ с таким ID не найден!" << endl;
         return;
@@ -220,22 +220,22 @@ static void handle_manage_order(DeliveryService& service)
     int choice = -1;
     while (choice != 0)
     {
-        print_manage_order_menu(o->get_id());
+        print_manage_order_menu(order->get_id());
         choice = read_int("Выберите действие: ");
 
         switch (choice)
         {
-        case 1: o->print_full_info(); break;
-        case 2: cout << "ID заказа: " << o->get_id() << endl; break;
-        case 3: cout << "Адрес: " << o->get_address() << endl; break;
-        case 4: cout << "Вес: " << o->get_weight() << " кг" << endl; break;
-        case 5: cout << "Район: " << o->get_district() << endl; break;
-        case 6: cout << "Статус: " << (o->get_is_assigned() ? "Доставляется" : "Ожидает назначения") << endl; break;
+        case 1: order->print_full_info(); break;
+        case 2: cout << "ID заказа: " << order->get_id() << endl; break;
+        case 3: cout << "Адрес: " << order->get_address() << endl; break;
+        case 4: cout << "Вес: " << order->get_weight() << " кг" << endl; break;
+        case 5: cout << "Район: " << order->get_district() << endl; break;
+        case 6: cout << "Статус: " << (order->get_is_assigned() ? "Доставляется" : "Ожидает назначения") << endl; break;
 
-        case 7:  handle_change_order_id(service, o); break;
-        case 8:  handle_change_order_address(o); break;
-        case 9:  handle_change_order_weight(o); break;
-        case 10: handle_change_order_district(o); break;
+        case 7:  handle_change_order_id(service, order); break;
+        case 8:  handle_change_order_address(order); break;
+        case 9:  handle_change_order_weight(order); break;
+        case 10: handle_change_order_district(order); break;
         case 0:  break;
         default: cout << "Неверный пункт меню!" << endl;
         }
@@ -254,29 +254,29 @@ static void handle_complete_delivery(DeliveryService& service)
     service.complete_delivery(vehicle_id);
 }
 
-static void handle_change_vehicle_id(DeliveryService& service, Vehicle* v)
+static void handle_change_vehicle_id(DeliveryService& service, Vehicle* vehicle)
 {
-    if (v->get_current_order_id() != -1)
+    if (vehicle->get_current_order_id() != -1)
     {
         cout << "Ошибка: нельзя менять ID транспорта во время доставки!" << endl;
         return;
     }
 
     int new_id = read_int("Введите новый ID: ");
-    if (service.check_vehicle_exists(new_id) && new_id != v->get_id())
+    if (service.check_vehicle_exists(new_id) && new_id != vehicle->get_id())
     {
         cout << "Ошибка: транспорт с таким ID уже существует!" << endl;
     }
     else
     {
-        v->set_id(new_id);
+        vehicle->set_id(new_id);
         cout << "ID успешно изменен." << endl;
     }
 }
 
-static void handle_change_vehicle_type(Vehicle* v)
+static void handle_change_vehicle_type(Vehicle* vehicle)
 {
-    if (v->get_current_order_id() != -1)
+    if (vehicle->get_current_order_id() != -1)
     {
         cout << "Ошибка: нельзя менять тип транспорта во время доставки!" << endl;
         return;
@@ -285,86 +285,86 @@ static void handle_change_vehicle_type(Vehicle* v)
     cout << "Введите новый тип (Мотоцикл/Машина): ";
     string type;
     getline(cin, type);
-    v->set_type(type);
+    vehicle->set_type(type);
 }
 
-static void handle_change_vehicle_capacity(Vehicle* v)
+static void handle_change_vehicle_capacity(Vehicle* vehicle)
 {
-    if (v->get_current_order_id() != -1)
+    if (vehicle->get_current_order_id() != -1)
     {
         cout << "Ошибка: нельзя менять грузоподъемность во время доставки!" << endl;
         return;
     }
 
     double cap = read_double("Введите новую грузоподъемность (кг): ");
-    v->set_capacity(cap);
+    vehicle->set_capacity(cap);
 }
 
-static void handle_change_vehicle_courier(Vehicle* v)
+static void handle_change_vehicle_courier(Vehicle* vehicle)
 {
     cout << "Введите новое имя курьера: ";
     string name;
     getline(cin, name);
-    v->set_courier_name(name);
+    vehicle->set_courier_name(name);
 }
 
-static void handle_change_vehicle_status(Vehicle* v)
+static void handle_change_vehicle_status(Vehicle* vehicle)
 {
-    if (v->get_current_order_id() != -1)
+    if (vehicle->get_current_order_id() != -1)
     {
         cout << "Ошибка: транспорт сейчас выполняет заказ! Изменение статуса заблокировано." << endl;
         return;
     }
 
-    bool current_status = v->get_is_available();
-    v->set_is_available(!current_status);
-    cout << "Статус изменен. Теперь транспорт: " << (v->get_is_available() ? "Свободен" : "Заблокирован") << endl;
+    bool current_status = vehicle->get_is_available();
+    vehicle->set_is_available(!current_status);
+    cout << "Статус изменен. Теперь транспорт: " << (vehicle->get_is_available() ? "Свободен" : "Заблокирован") << endl;
 }
 
-static void handle_change_order_id(DeliveryService& service, Order* o)
+static void handle_change_order_id(DeliveryService& service, Order* order)
 {
-    if (o->get_is_assigned())
+    if (order->get_is_assigned())
     {
         cout << "Ошибка: нельзя менять ID заказа, который уже доставляется!" << endl;
         return;
     }
 
     int new_id = read_int("Введите новый ID: ");
-    if (service.check_order_exists(new_id) && new_id != o->get_id())
+    if (service.check_order_exists(new_id) && new_id != order->get_id())
     {
         cout << "Ошибка: заказ с таким ID уже существует!" << endl;
     }
     else
     {
-        o->set_id(new_id);
+        order->set_id(new_id);
         cout << "ID успешно изменен." << endl;
     }
 }
 
-static void handle_change_order_address(Order* o)
+static void handle_change_order_address(Order* order)
 {
     cout << "Введите новый адрес: ";
     string addr;
     getline(cin, addr);
-    o->set_address(addr);
+    order->set_address(addr);
 }
 
-static void handle_change_order_weight(Order* o)
+static void handle_change_order_weight(Order* order)
 {
-    if (o->get_is_assigned())
+    if (order->get_is_assigned())
     {
         cout << "Ошибка: нельзя менять вес заказа, который уже назначен на транспорт!" << endl;
         return;
     }
 
     double w = read_double("Введите новый вес (кг): ");
-    o->set_weight(w);
+    order->set_weight(w);
 }
 
-static void handle_change_order_district(Order* o)
+static void handle_change_order_district(Order* order)
 {
     cout << "Введите новый район: ";
     string dist;
     getline(cin, dist);
-    o->set_district(dist);
+    order->set_district(dist);
 }
