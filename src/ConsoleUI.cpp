@@ -24,6 +24,9 @@ static void handle_complete_delivery(DeliveryService& delivery_service);
 static void handle_compare_orders(DeliveryService& delivery_service);
 static void handle_compare_vehicles(DeliveryService& delivery_service);
 
+static void print_order_comparison(const Order* first_order, const Order* second_order, const string& op_symbol, bool result);
+static void print_vehicle_comparison(const Vehicle* first_vehicle, const Vehicle* second_vehicle, const string& op_symbol, bool result);
+
 static void handle_change_vehicle_id(DeliveryService& delivery_service, Vehicle* vehicle);
 static void handle_change_vehicle_type(Vehicle* vehicle);
 static void handle_change_vehicle_capacity(Vehicle* vehicle);
@@ -143,7 +146,7 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
 {
     Vehicle vehicle;
     cin >> vehicle;
-    delivery_service += vehicle; 
+    delivery_service += vehicle;
 }
 
 static void handle_add_order(DeliveryService& delivery_service)
@@ -157,6 +160,20 @@ static void handle_remove_order(DeliveryService& delivery_service)
 {
     int order_id = read_int("Введите ID заказа для удаления: ");
     delivery_service -= order_id;
+}
+
+static void print_order_comparison(const Order* first_order, const Order* second_order, const string& op_symbol, bool result)
+{
+    cout << "(первый заказ " << op_symbol << " второй заказ) => " << (result ? "true" : "false")
+        << " (Вес номера " << first_order->get_id() << ": " << first_order->get_weight() << " кг "
+        << op_symbol << " Вес номера " << second_order->get_id() << ": " << second_order->get_weight() << " кг)" << endl;
+}
+
+static void print_vehicle_comparison(const Vehicle* first_vehicle, const Vehicle* second_vehicle, const string& op_symbol, bool result)
+{
+    cout << "(первый транспорт " << op_symbol << " второй транспорт) => " << (result ? "true" : "false")
+        << " (Грузоподъемность номера " << first_vehicle->get_id() << ": " << first_vehicle->get_capacity() << " кг "
+        << op_symbol << " номера " << second_vehicle->get_id() << ": " << second_vehicle->get_capacity() << " кг)" << endl;
 }
 
 static void handle_compare_orders(DeliveryService& delivery_service)
@@ -179,7 +196,7 @@ static void handle_compare_orders(DeliveryService& delivery_service)
         return;
     }
 
-    cout << "\n--- Выберите оператор сравнения для Заказов ---" << endl;
+    cout << "\n--- Выберите оператор сравнения для заказов ---" << endl;
     cout << "1. == (Равенство по ID)\n"
         << "2. != (Неравенство по ID)\n"
         << "3. <  (Меньше по весу)\n"
@@ -198,16 +215,16 @@ static void handle_compare_orders(DeliveryService& delivery_service)
         cout << "(первый заказ != второй заказ) => " << ((*first_order != *second_order) ? "true (ID разные)" : "false (ID одинаковые)") << endl;
         break;
     case 3:
-        cout << "(первый заказ < второй заказ) => " << ((*first_order < *second_order) ? "true" : "false") << endl;
+        print_order_comparison(first_order, second_order, "<", *first_order < *second_order);
         break;
     case 4:
-        cout << "(первый заказ > второй заказ) => " << ((*first_order > *second_order) ? "true" : "false") << endl;
+        print_order_comparison(first_order, second_order, ">", *first_order > *second_order);
         break;
     case 5:
-        cout << "(первый заказ <= второй заказ) => " << ((*first_order <= *second_order) ? "true" : "false") << endl;
+        print_order_comparison(first_order, second_order, "<=", *first_order <= *second_order);
         break;
     case 6:
-        cout << "(первый заказ >= второй заказ) => " << ((*first_order >= *second_order) ? "true" : "false") << endl;
+        print_order_comparison(first_order, second_order, ">=", *first_order >= *second_order);
         break;
     default:
         cout << "Неверный пункт!" << endl;
@@ -234,7 +251,7 @@ static void handle_compare_vehicles(DeliveryService& delivery_service)
         return;
     }
 
-    cout << "\n--- Выберите оператор сравнения для Транспорта ---" << endl;
+    cout << "\n--- Выберите оператор сравнения для транспорта ---" << endl;
     cout << "1. == (Равенство по ID)\n"
         << "2. != (Неравенство по ID)\n"
         << "3. <  (Меньше по грузоподъемности)\n"
@@ -253,16 +270,16 @@ static void handle_compare_vehicles(DeliveryService& delivery_service)
         cout << "(первый транспорт != второй транспорт) => " << ((*first_vehicle != *second_vehicle) ? "true (ID разные)" : "false (ID одинаковые)") << endl;
         break;
     case 3:
-        cout << "(первый транспорт < второй транспорт) => " << ((*first_vehicle < *second_vehicle) ? "true" : "false") << endl;
+        print_vehicle_comparison(first_vehicle, second_vehicle, "<", *first_vehicle < *second_vehicle);
         break;
     case 4:
-        cout << "(первый транспорт > второй транспорт) => " << ((*first_vehicle > *second_vehicle) ? "true" : "false") << endl;
+        print_vehicle_comparison(first_vehicle, second_vehicle, ">", *first_vehicle > *second_vehicle);
         break;
     case 5:
-        cout << "(первый транспорт <= второй транспорт) => " << ((*first_vehicle <= *second_vehicle) ? "true" : "false") << endl;
+        print_vehicle_comparison(first_vehicle, second_vehicle, "<=", *first_vehicle <= *second_vehicle);
         break;
     case 6:
-        cout << "(первый транспорт >= второй транспорт) => " << ((*first_vehicle >= *second_vehicle) ? "true" : "false") << endl;
+        print_vehicle_comparison(first_vehicle, second_vehicle, ">=", *first_vehicle >= *second_vehicle);
         break;
     default:
         cout << "Неверный пункт!" << endl;
