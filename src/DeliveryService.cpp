@@ -175,3 +175,20 @@ bool DeliveryService::check_order_exists(int id) const
 {
     return find_order_index_by_id(id) != -1;
 }
+
+DeliveryService& DeliveryService::operator+=(const Order& order)
+{
+    this->add_order(order);
+    return *this;
+}
+
+DeliveryService& DeliveryService::operator-=(int order_id)
+{
+    this->remove_order_by_id(order_id);
+    return *this;
+}
+
+DeliveryService& DeliveryService::operator-=(const Order& order)
+{
+    return *this -= order.get_id();
+}

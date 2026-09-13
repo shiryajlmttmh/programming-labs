@@ -153,11 +153,7 @@ static void handle_add_order(DeliveryService& service)
 {
     Order order;
     cin >> order;
-
-    if (service.add_order(order))
-    {
-        cout << "Успех: заказ добавлен в систему." << endl;
-    }
+    service += order;
 }
 
 static void handle_manage_vehicle(DeliveryService& service)

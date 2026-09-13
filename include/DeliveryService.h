@@ -26,4 +26,8 @@ public:
     Order* get_order(int id);
     bool check_vehicle_exists(int id) const;
     bool check_order_exists(int id) const;
+
+    DeliveryService& operator+=(const Order& order);
+    DeliveryService& operator-=(int order_id);
+    DeliveryService& operator-=(const Order& order);
 };
