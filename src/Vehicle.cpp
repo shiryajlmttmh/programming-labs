@@ -1,5 +1,6 @@
 #include "Vehicle.h"
 #include "Order.h"
+#include <format>
 
 using namespace std;
 
@@ -121,11 +122,12 @@ void Vehicle::set_is_available(bool new_status) { is_available = new_status; }
 string Vehicle::get_full_info() const
 {
     string status_text = is_available ? "Свободен" : ("Занят (Заказ номер " + to_string(current_order_id) + ")");
+    string capacity_str = std::format("{:.1f}", capacity);
 
     return "Транспорт номер " + to_string(id) +
         " (" + type + ")" +
         ". Курьер: " + courier_name +
-        ". Грузоподъемность: " + to_string(capacity) + " кг" +
+        ". Грузоподъемность: " + capacity_str + " кг" +
         ". Статус: " + status_text;
 }
 
