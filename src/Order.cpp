@@ -65,13 +65,13 @@ bool Order::operator>(const Order& other) const { return this->weight > other.we
 bool Order::operator<=(const Order& other) const { return this->weight <= other.weight; }
 bool Order::operator>=(const Order& other) const { return this->weight >= other.weight; }
 
-std::ostream& operator<<(std::ostream& os, const Order& order)
+ostream& operator<<(ostream& os, const Order& order)
 {
     os << order.get_full_info();
     return os;
 }
 
-std::istream& operator>>(std::istream& is, Order& order)
+istream& operator>>(istream& is, Order& order)
 {
     order.id = read_int("Введите ID заказа: ");
 

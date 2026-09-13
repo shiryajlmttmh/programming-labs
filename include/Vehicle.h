@@ -51,6 +51,7 @@ public:
     bool operator<=(const Vehicle& other) const;
     bool operator>=(const Vehicle& other) const;
 
-    friend std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle);
     friend std::istream& operator>>(std::istream& is, Vehicle& vehicle);
 };
+
+std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle);

@@ -148,13 +148,13 @@ bool Vehicle::operator>(const Vehicle& other) const { return this->capacity > ot
 bool Vehicle::operator<=(const Vehicle& other) const { return this->capacity <= other.capacity; }
 bool Vehicle::operator>=(const Vehicle& other) const { return this->capacity >= other.capacity; }
 
-std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)
+ostream& operator<<(ostream& os, const Vehicle& vehicle)
 {
     os << vehicle.get_full_info();
     return os;
 }
 
-std::istream& operator>>(std::istream& is, Vehicle& vehicle)
+istream& operator>>(istream& is, Vehicle& vehicle)
 {
     vehicle.id = read_int("Введите ID транспорта: ");
 
