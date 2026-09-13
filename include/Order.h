@@ -34,8 +34,11 @@ public:
 
     bool operator==(const Order& other) const;
     bool operator!=(const Order& other) const;
+
     bool operator<(const Order& other) const;
     bool operator>(const Order& other) const;
+    bool operator<=(const Order& other) const;
+    bool operator>=(const Order& other) const;
 
     friend std::istream& operator>>(std::istream& is, Order& order);
 };

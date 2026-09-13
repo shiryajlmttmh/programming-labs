@@ -1,5 +1,6 @@
 #include "Vehicle.h"
 #include "Order.h"
+#include "InputUtils.h"
 #include <iostream>
 #include <format>
 
@@ -15,6 +16,8 @@ double Vehicle::get_max_capacity_for_type(const string& check_type) const
     if (check_type == "Мотоцикл") return MAX_MOTORCYCLE_CAPACITY;
     return MAX_CAR_CAPACITY;
 }
+
+Vehicle::Vehicle() : id(0), type("Машина"), capacity(MAX_CAR_CAPACITY), courier_name(""), is_available(true), current_order_id(-1) {}
 
 Vehicle::Vehicle(int id, const string& type, double capacity, const string& courier_name, bool is_available)
 {
@@ -135,4 +138,51 @@ string Vehicle::get_full_info() const
 void Vehicle::print_full_info() const
 {
     cout << get_full_info() << endl;
+}
+
+bool Vehicle::operator==(const Vehicle& other) const { return this->id == other.id; }
+bool Vehicle::operator!=(const Vehicle& other) const { return !(*this == other); }
+
+bool Vehicle::operator<(const Vehicle& other) const { return this->capacity < other.capacity; }
+bool Vehicle::operator>(const Vehicle& other) const { return this->capacity > other.capacity; }
+bool Vehicle::operator<=(const Vehicle& other) const { return this->capacity <= other.capacity; }
+bool Vehicle::operator>=(const Vehicle& other) const { return this->capacity >= other.capacity; }
+
+std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)
+{
+    os << vehicle.get_full_info();
+    return os;
+}
+
+std::istream& operator>>(std::istream& is, Vehicle& vehicle)
+{
+    vehicle.id = read_int("Введите ID транспорта: ");
+
+    while (true)
+    {
+        cout << "Введите тип (Мотоцикл/Машина): ";
+        getline(is, vehicle.type);
+        if (vehicle.is_valid_type(vehicle.type)) break;
+        cout << "Ошибка: тип должен быть 'Мотоцикл' или 'Машина'! Попробуйте снова." << endl;
+    }
+
+    double max_cap = vehicle.get_max_capacity_for_type(vehicle.type);
+    while (true)
+    {
+        double cap = read_double("Введите грузоподъемность (кг): ");
+        if (cap > 0 && cap <= max_cap)
+        {
+            vehicle.capacity = cap;
+            break;
+        }
+        cout << "Ошибка: грузоподъемность для " << vehicle.type << " должна быть от 0 до " << max_cap << " кг!" << endl;
+    }
+
+    cout << "Введите имя курьера: ";
+    getline(is, vehicle.courier_name);
+
+    vehicle.is_available = true;
+    vehicle.current_order_id = -1;
+
+    return is;
 }

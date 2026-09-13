@@ -28,6 +28,7 @@ public:
     bool check_order_exists(int id) const;
 
     DeliveryService& operator+=(const Order& order);
+    DeliveryService& operator+=(const Vehicle& vehicle);
     DeliveryService& operator-=(int order_id);
     DeliveryService& operator-=(const Order& order);
 };

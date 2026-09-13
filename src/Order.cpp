@@ -57,25 +57,13 @@ string Order::get_full_info() const
         ". Статус: " + status_text;
 }
 
-bool Order::operator==(const Order& other) const
-{
-    return this->id == other.id;
-}
+bool Order::operator==(const Order& other) const { return this->id == other.id; }
+bool Order::operator!=(const Order& other) const { return !(*this == other); }
 
-bool Order::operator!=(const Order& other) const
-{
-    return !(*this == other);
-}
-
-bool Order::operator<(const Order& other) const
-{
-    return this->weight < other.weight;
-}
-
-bool Order::operator>(const Order& other) const
-{
-    return this->weight > other.weight;
-}
+bool Order::operator<(const Order& other) const { return this->weight < other.weight; }
+bool Order::operator>(const Order& other) const { return this->weight > other.weight; }
+bool Order::operator<=(const Order& other) const { return this->weight <= other.weight; }
+bool Order::operator>=(const Order& other) const { return this->weight >= other.weight; }
 
 std::ostream& operator<<(std::ostream& os, const Order& order)
 {

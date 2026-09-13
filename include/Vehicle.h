@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <iostream>
 
 class Order;
 
@@ -20,6 +21,7 @@ private:
     double get_max_capacity_for_type(const std::string& check_type) const;
 
 public:
+    Vehicle();
     Vehicle(int id, const std::string& type, double capacity, const std::string& courier_name, bool is_available = true);
 
     bool assign_order(const Order& order);
@@ -40,4 +42,15 @@ public:
 
     std::string get_full_info() const;
     void print_full_info() const;
+
+    bool operator==(const Vehicle& other) const;
+    bool operator!=(const Vehicle& other) const;
+
+    bool operator<(const Vehicle& other) const;
+    bool operator>(const Vehicle& other) const;
+    bool operator<=(const Vehicle& other) const;
+    bool operator>=(const Vehicle& other) const;
+
+    friend std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle);
+    friend std::istream& operator>>(std::istream& is, Vehicle& vehicle);
 };
