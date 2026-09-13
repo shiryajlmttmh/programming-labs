@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <iostream>
 
 class Order
 {
@@ -14,6 +15,7 @@ private:
     bool is_assigned;
 
 public:
+    Order();
     Order(int id, const std::string& address, double weight, const std::string& district);
 
     int get_id() const;
@@ -29,5 +31,13 @@ public:
     void set_is_assigned(bool status);
 
     std::string get_full_info() const;
-    void print_full_info() const;
+
+    bool operator==(const Order& other) const;
+    bool operator!=(const Order& other) const;
+    bool operator<(const Order& other) const;
+    bool operator>(const Order& other) const;
+
+    friend std::istream& operator>>(std::istream& is, Order& order);
 };
+
+std::ostream& operator<<(std::ostream& os, const Order& order);

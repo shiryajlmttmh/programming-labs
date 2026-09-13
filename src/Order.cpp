@@ -1,8 +1,11 @@
 #include "Order.h"
+#include "InputUtils.h"
 #include <iostream>
 #include <format>
 
 using namespace std;
+
+Order::Order() : id(0), address(""), weight(MIN_WEIGHT), district(""), is_assigned(false) {}
 
 Order::Order(int id, const string& address, double weight, const string& district)
 {
@@ -54,7 +57,56 @@ string Order::get_full_info() const
         ". Статус: " + status_text;
 }
 
-void Order::print_full_info() const
+bool Order::operator==(const Order& other) const
 {
-    cout << get_full_info() << endl;
+    return this->id == other.id;
+}
+
+bool Order::operator!=(const Order& other) const
+{
+    return !(*this == other);
+}
+
+bool Order::operator<(const Order& other) const
+{
+    return this->weight < other.weight;
+}
+
+bool Order::operator>(const Order& other) const
+{
+    return this->weight > other.weight;
+}
+
+std::ostream& operator<<(std::ostream& os, const Order& order)
+{
+    os << order.get_full_info();
+    return os;
+}
+
+std::istream& operator>>(std::istream& is, Order& order)
+{
+    order.id = read_int("Введите ID заказа: ");
+
+    cout << "Введите адрес: ";
+    getline(is, order.address);
+
+    while (true)
+    {
+        double input_weight = read_double("Введите вес (кг): ");
+        if (input_weight >= Order::MIN_WEIGHT && input_weight <= Order::MAX_WEIGHT)
+        {
+            order.weight = input_weight;
+            break;
+        }
+
+        cout << "Ошибка: Вес заказа должен быть от " << Order::MIN_WEIGHT
+            << " до " << Order::MAX_WEIGHT << " кг! Попробуйте снова." << endl;
+    }
+
+    cout << "Введите район: ";
+    getline(is, order.district);
+
+    order.is_assigned = false;
+
+    return is;
 }

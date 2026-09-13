@@ -151,19 +151,10 @@ static void handle_add_vehicle(DeliveryService& service)
 
 static void handle_add_order(DeliveryService& service)
 {
-    int id = read_int("Введите ID заказа: ");
+    Order order;
+    cin >> order;
 
-    cout << "Введите адрес: ";
-    string address;
-    getline(cin, address);
-
-    double weight = read_double("Введите вес (кг): ");
-
-    cout << "Введите район: ";
-    string district;
-    getline(cin, district);
-
-    if (service.add_order(Order(id, address, weight, district)))
+    if (service.add_order(order))
     {
         cout << "Успех: заказ добавлен в систему." << endl;
     }
@@ -225,7 +216,7 @@ static void handle_manage_order(DeliveryService& service)
 
         switch (choice)
         {
-        case 1: order->print_full_info(); break;
+        case 1: cout << order << endl; break;
         case 2: cout << "ID заказа: " << order->get_id() << endl; break;
         case 3: cout << "Адрес: " << order->get_address() << endl; break;
         case 4: cout << "Вес: " << order->get_weight() << " кг" << endl; break;

@@ -14,7 +14,7 @@ void DeliveryService::print_all_orders() const
 {
     cout << "\n--- Список активных заказов ---" << endl;
     if (orders.empty()) { cout << "Список пуст." << endl; return; }
-    for (int i = 0; i < orders.size(); i++) orders[i].print_full_info();
+    for (int i = 0; i < orders.size(); i++) cout << orders[i] << endl;
 }
 
 bool DeliveryService::add_vehicle(const Vehicle& vehicle)
