@@ -7,14 +7,14 @@ void DeliveryService::print_all_vehicles() const
 {
     cout << "\n--- Список транспорта ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
-    for (size_t i = 0; i < vehicles.size(); i++) cout << vehicles[i] << endl;
+    for (int i = 0; i < vehicles.size(); i++) cout << vehicles[i] << endl;
 }
 
 void DeliveryService::print_all_orders() const
 {
     cout << "\n--- Список активных заказов ---" << endl;
     if (orders.empty()) { cout << "Список пуст." << endl; return; }
-    for (size_t i = 0; i < orders.size(); i++) cout << orders[i] << endl;
+    for (int i = 0; i < orders.size(); i++) cout << orders[i] << endl;
 }
 
 bool DeliveryService::add_vehicle(const Vehicle& vehicle)
@@ -64,7 +64,7 @@ int DeliveryService::find_optimal_vehicle_index(double order_weight) const
     int vehicle_index = -1;
     double min_capacity = 0;
 
-    for (size_t i = 0; i < vehicles.size(); i++)
+    for (int i = 0; i < vehicles.size(); i++)
     {
         double curr_capacity = vehicles[i].get_capacity();
         if (vehicles[i].get_is_available() && curr_capacity >= order_weight)
@@ -72,7 +72,7 @@ int DeliveryService::find_optimal_vehicle_index(double order_weight) const
             if (vehicle_index == -1 || curr_capacity < min_capacity)
             {
                 min_capacity = curr_capacity;
-                vehicle_index = static_cast<int>(i);
+                vehicle_index = i;
             }
         }
     }
@@ -82,16 +82,16 @@ int DeliveryService::find_optimal_vehicle_index(double order_weight) const
 
 int DeliveryService::find_vehicle_index_by_id(int id) const
 {
-    for (size_t i = 0; i < vehicles.size(); i++)
-        if (vehicles[i].get_id() == id) return static_cast<int>(i);
+    for (int i = 0; i < vehicles.size(); i++)
+        if (vehicles[i].get_id() == id) return i;
 
     return -1;
 }
 
 int DeliveryService::find_order_index_by_id(int id) const
 {
-    for (size_t i = 0; i < orders.size(); i++)
-        if (orders[i].get_id() == id) return static_cast<int>(i);
+    for (int i = 0; i < orders.size(); i++)
+        if (orders[i].get_id() == id) return i;
 
     return -1;
 }
