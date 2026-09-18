@@ -8,12 +8,13 @@ using namespace std;
 
 bool Vehicle::is_valid_type(const string& check_type) const
 {
-    return (check_type == "Мотоцикл" || check_type == "Машина");
+    return (check_type == "Мотоцикл" || check_type == "Машина" || check_type == "Грузовик");
 }
 
 double Vehicle::get_max_capacity_for_type(const string& check_type) const
 {
     if (check_type == "Мотоцикл") return MAX_MOTORCYCLE_CAPACITY;
+    if (check_type == "Грузовик") return MAX_TRUCK_CAPACITY;
     return MAX_CAR_CAPACITY;
 }
 
@@ -96,7 +97,7 @@ void Vehicle::set_type(const string& new_type)
 {
     if (!is_valid_type(new_type))
     {
-        cout << "Ошибка: Разрешены только типы 'Мотоцикл' и 'Машина'!" << endl;
+        cout << "Ошибка: Разрешены только типы 'Мотоцикл', 'Машина' и 'Грузовик'!" << endl;
         return;
     }
 
@@ -160,10 +161,10 @@ istream& operator>>(istream& is, Vehicle& vehicle)
 
     while (true)
     {
-        cout << "Введите тип (Мотоцикл/Машина): ";
+        cout << "Введите тип (Мотоцикл/Машина/Грузовик): ";
         getline(is, vehicle.type);
         if (vehicle.is_valid_type(vehicle.type)) break;
-        cout << "Ошибка: тип должен быть 'Мотоцикл' или 'Машина'! Попробуйте снова." << endl;
+        cout << "Ошибка: тип должен быть 'Мотоцикл', 'Машина' или 'Грузовик'! Попробуйте снова." << endl;
     }
 
     double max_cap = vehicle.get_max_capacity_for_type(vehicle.type);

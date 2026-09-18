@@ -6,7 +6,7 @@
 class DeliveryService
 {
 private:
-    std::vector<Vehicle> vehicles;
+    std::vector<Vehicle*> vehicles;
     std::vector<Order> orders;
 
     int find_vehicle_index_by_id(int id) const;
@@ -14,9 +14,12 @@ private:
     int find_optimal_vehicle_index(double order_weight) const;
 
 public:
+    DeliveryService() = default;
+
     void print_all_vehicles() const;
     void print_all_orders() const;
-    bool add_vehicle(const Vehicle& vehicle);
+
+    bool add_vehicle(Vehicle* vehicle);
     bool add_order(const Order& order);
     bool assign_order_to_vehicle(int order_id);
     bool remove_order_by_id(int order_id);
@@ -28,7 +31,7 @@ public:
     bool check_order_exists(int id) const;
 
     DeliveryService& operator+=(const Order& order);
-    DeliveryService& operator+=(const Vehicle& vehicle);
+    DeliveryService& operator+=(Vehicle* vehicle);
     DeliveryService& operator-=(int order_id);
     DeliveryService& operator-=(const Order& order);
 };

@@ -1,6 +1,9 @@
 #include "ConsoleUI.h"
 #include "InputUtils.h"
 #include "DeliveryService.h"
+#include "Motorcycle.h"
+#include "Car.h"
+#include "Truck.h"
 #include <iostream>
 #include <windows.h>
 #include <string>
@@ -10,13 +13,14 @@ using namespace std;
 static void setup_console_encoding();
 static void seed_data(DeliveryService& delivery_service);
 static void print_menu();
-static void print_manage_vehicle_menu(int vehicle_id);
+static void print_manage_vehicle_menu(Vehicle* vehicle);
 static void print_manage_order_menu(int order_id);
 
 static void handle_add_vehicle(DeliveryService& delivery_service);
 static void handle_add_order(DeliveryService& delivery_service);
 static void handle_remove_order(DeliveryService& delivery_service);
 static void handle_manage_vehicle(DeliveryService& delivery_service);
+static void handle_specific_vehicle_action(Vehicle* vehicle);
 static void handle_manage_order(DeliveryService& delivery_service);
 static void handle_assign_order(DeliveryService& delivery_service);
 static void handle_complete_delivery(DeliveryService& delivery_service);
@@ -28,7 +32,6 @@ static void print_order_comparison(const Order* first_order, const Order* second
 static void print_vehicle_comparison(const Vehicle* first_vehicle, const Vehicle* second_vehicle, const string& op_symbol, bool result);
 
 static void handle_change_vehicle_id(DeliveryService& delivery_service, Vehicle* vehicle);
-static void handle_change_vehicle_type(Vehicle* vehicle);
 static void handle_change_vehicle_capacity(Vehicle* vehicle);
 static void handle_change_vehicle_courier(Vehicle* vehicle);
 static void handle_change_vehicle_status(Vehicle* vehicle);
@@ -78,9 +81,9 @@ static void setup_console_encoding()
 
 static void seed_data(DeliveryService& delivery_service)
 {
-    delivery_service += Vehicle(1, "Мотоцикл", 30.0, "Иван", true);
-    delivery_service += Vehicle(2, "Машина", 500.0, "Алексей", true);
-    delivery_service += Vehicle(3, "Машина", 1200.0, "Дмитрий", true);
+    delivery_service += Motorcycle(1, 25.0, "Иван", true, true);
+    delivery_service += Car(2, 450.0, "Алексей", true, 500.0);
+    delivery_service += Truck(3, 5000.0, "Дмитрий", true, true);
 
     delivery_service += Order(101, "ул. Ленина, 5", 15.0, "Центральный");
     delivery_service += Order(102, "пр. Мира, 12", 250.0, "Северный");
@@ -105,9 +108,9 @@ static void print_menu()
         << "0. Выход\n";
 }
 
-static void print_manage_vehicle_menu(int vehicle_id)
+static void print_manage_vehicle_menu(Vehicle* vehicle)
 {
-    cout << "\n--- Управление транспортом ID " << vehicle_id << " ---" << endl;
+    cout << "\n--- Управление транспортом ID " << vehicle->get_id() << " (" << vehicle->get_type() << ") ---" << endl;
     cout << "[Просмотр полей]\n"
         << "1. Показать полную информацию\n"
         << "2. Показать ID\n"
@@ -117,11 +120,27 @@ static void print_manage_vehicle_menu(int vehicle_id)
         << "6. Показать статус доступности\n"
         << "[Изменение полей]\n"
         << "7. Изменить ID\n"
-        << "8. Изменить тип\n"
-        << "9. Изменить грузоподъемность\n"
-        << "10. Изменить имя курьера\n"
-        << "11. Изменить статус доступности\n"
-        << "0. Назад в главное меню\n";
+        << "8. Изменить грузоподъемность\n"
+        << "9. Изменить имя курьера\n"
+        << "10. Изменить статус доступности\n";
+
+    if (vehicle->get_type() == "Мотоцикл")
+    {
+        cout << "[Специфические действия]\n"
+            << "11. Переключить наличие термокороба\n";
+    }
+    else if (vehicle->get_type() == "Машина")
+    {
+        cout << "[Специфические действия]\n"
+            << "11. Проверить вместительность багажника\n";
+    }
+    else if (vehicle->get_type() == "Грузовик")
+    {
+        cout << "[Специфические действия]\n"
+            << "11. Переключить наличие гидроборта\n";
+    }
+
+    cout << "0. Назад в главное меню\n";
 }
 
 static void print_manage_order_menu(int order_id)
@@ -144,9 +163,46 @@ static void print_manage_order_menu(int order_id)
 
 static void handle_add_vehicle(DeliveryService& delivery_service)
 {
-    Vehicle vehicle;
-    cin >> vehicle;
-    delivery_service += vehicle;
+    cout << "\n--- Выберите тип создаваемого транспорта ---" << endl;
+    cout << "1. Мотоцикл\n"
+        << "2. Легковой автомобиль\n"
+        << "3. Грузовик\n";
+
+    int type_choice;
+    while (true)
+    {
+        type_choice = read_int("Ваш выбор: ");
+        if (type_choice >= 1 && type_choice <= 3)
+        {
+            break;
+        }
+        cout << "Ошибка: введите число от 1 до 3!" << endl;
+    }
+
+    switch (type_choice)
+    {
+    case 1:
+    {
+        Motorcycle motorcycle;
+        cin >> motorcycle;
+        delivery_service += motorcycle;
+        break;
+    }
+    case 2:
+    {
+        Car car;
+        cin >> car;
+        delivery_service += car;
+        break;
+    }
+    case 3:
+    {
+        Truck truck;
+        cin >> truck;
+        delivery_service += truck;
+        break;
+    }
+    }
 }
 
 static void handle_add_order(DeliveryService& delivery_service)
@@ -300,7 +356,7 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
     int menu_choice = -1;
     while (menu_choice != 0)
     {
-        print_manage_vehicle_menu(vehicle->get_id());
+        print_manage_vehicle_menu(vehicle);
         menu_choice = read_int("Выберите действие: ");
 
         switch (menu_choice)
@@ -313,13 +369,43 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
         case 6: cout << "Статус доступности: " << (vehicle->get_is_available() ? "Свободен" : "Недоступен / Занят") << endl; break;
 
         case 7:  handle_change_vehicle_id(delivery_service, vehicle); break;
-        case 8:  handle_change_vehicle_type(vehicle); break;
-        case 9:  handle_change_vehicle_capacity(vehicle); break;
-        case 10: handle_change_vehicle_courier(vehicle); break;
-        case 11: handle_change_vehicle_status(vehicle); break;
+        case 8:  handle_change_vehicle_capacity(vehicle); break;
+        case 9:  handle_change_vehicle_courier(vehicle); break;
+        case 10: handle_change_vehicle_status(vehicle); break;
+        case 11: handle_specific_vehicle_action(vehicle); break;
         case 0:  break;
         default: cout << "Неверный пункт меню!" << endl;
         }
+    }
+}
+
+static void handle_specific_vehicle_action(Vehicle* vehicle)
+{
+    const string type = vehicle->get_type();
+
+    if (type == "Мотоцикл")
+    {
+        Motorcycle* motorcycle = static_cast<Motorcycle*>(vehicle);
+        motorcycle->toggle_thermal_box();
+    }
+    else if (type == "Машина")
+    {
+        Car* car = static_cast<Car*>(vehicle);
+        if (car->is_trunk_spacious())
+        {
+            cout << "Багажник у машины ID " << car->get_id() << " вместительный (объём: "
+                << car->get_trunk_volume() << " л)." << endl;
+        }
+        else
+        {
+            cout << "Багажник у машины ID " << car->get_id() << " стандартный (объём: "
+                << car->get_trunk_volume() << " л)." << endl;
+        }
+    }
+    else if (type == "Грузовик")
+    {
+        Truck* truck = static_cast<Truck*>(vehicle);
+        truck->toggle_tail_lift();
     }
 }
 
@@ -389,20 +475,6 @@ static void handle_change_vehicle_id(DeliveryService& delivery_service, Vehicle*
         vehicle->set_id(new_vehicle_id);
         cout << "ID успешно изменен." << endl;
     }
-}
-
-static void handle_change_vehicle_type(Vehicle* vehicle)
-{
-    if (vehicle->get_current_order_id() != -1)
-    {
-        cout << "Ошибка: нельзя менять тип транспорта во время доставки!" << endl;
-        return;
-    }
-
-    cout << "Введите новый тип (Мотоцикл/Машина): ";
-    string new_vehicle_type;
-    getline(cin, new_vehicle_type);
-    vehicle->set_type(new_vehicle_type);
 }
 
 static void handle_change_vehicle_capacity(Vehicle* vehicle)
