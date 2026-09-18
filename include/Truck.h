@@ -18,6 +18,7 @@ public:
     void toggle_tail_lift();
     std::string get_full_info() const;
 
-    friend std::ostream& operator<<(std::ostream& os, const Truck& truck);
     friend std::istream& operator>>(std::istream& is, Truck& truck);
 };
+
+std::ostream& operator<<(std::ostream& os, const Truck& truck);

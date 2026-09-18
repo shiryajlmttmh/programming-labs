@@ -18,6 +18,7 @@ public:
     void toggle_thermal_box();
     std::string get_full_info() const;
 
-    friend std::ostream& operator<<(std::ostream& os, const Motorcycle& motorcycle);
     friend std::istream& operator>>(std::istream& is, Motorcycle& motorcycle);
 };
+
+std::ostream& operator<<(std::ostream& os, const Motorcycle& motorcycle);
