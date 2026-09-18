@@ -6,6 +6,10 @@ class Order;
 
 class Vehicle
 {
+protected:
+    static constexpr double MAX_MOTORCYCLE_CAPACITY = 50.0;
+    static constexpr double MAX_CAR_CAPACITY = 1500.0;
+
 private:
     int id;
     std::string type;
@@ -13,9 +17,6 @@ private:
     std::string courier_name;
     bool is_available;
     int current_order_id;
-
-    static constexpr double MAX_MOTORCYCLE_CAPACITY = 50.0;
-    static constexpr double MAX_CAR_CAPACITY = 1500.0;
 
     bool is_valid_type(const std::string& check_type) const;
     double get_max_capacity_for_type(const std::string& check_type) const;
