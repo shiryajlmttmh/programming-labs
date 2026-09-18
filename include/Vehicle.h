@@ -9,6 +9,7 @@ class Vehicle
 protected:
     static constexpr double MAX_MOTORCYCLE_CAPACITY = 50.0;
     static constexpr double MAX_CAR_CAPACITY = 1500.0;
+    static constexpr double MAX_TRUCK_CAPACITY = 10000.0;
 
 private:
     int id;
