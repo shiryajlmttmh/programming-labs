@@ -14,7 +14,7 @@ private:
     int find_optimal_vehicle_index(double order_weight) const;
 
 public:
-    DeliveryService() = default;
+    ~DeliveryService();
 
     void print_all_vehicles() const;
     void print_all_orders() const;

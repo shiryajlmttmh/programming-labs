@@ -81,9 +81,9 @@ static void setup_console_encoding()
 
 static void seed_data(DeliveryService& delivery_service)
 {
-    delivery_service += Motorcycle(1, 25.0, "Иван", true, true);
-    delivery_service += Car(2, 450.0, "Алексей", true, 500.0);
-    delivery_service += Truck(3, 5000.0, "Дмитрий", true, true);
+    delivery_service += new Motorcycle(1, 25.0, "Иван", true, true);
+    delivery_service += new Car(2, 450.0, "Алексей", true, 500.0);
+    delivery_service += new Truck(3, 5000.0, "Дмитрий", true, true);
 
     delivery_service += Order(101, "ул. Ленина, 5", 15.0, "Центральный");
     delivery_service += Order(102, "пр. Мира, 12", 250.0, "Северный");
@@ -183,22 +183,22 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
     {
     case 1:
     {
-        Motorcycle motorcycle;
-        cin >> motorcycle;
+        Motorcycle* motorcycle = new Motorcycle();
+        cin >> *motorcycle;
         delivery_service += motorcycle;
         break;
     }
     case 2:
     {
-        Car car;
-        cin >> car;
+        Car* car = new Car();
+        cin >> *car;
         delivery_service += car;
         break;
     }
     case 3:
     {
-        Truck truck;
-        cin >> truck;
+        Truck* truck = new Truck();
+        cin >> *truck;
         delivery_service += truck;
         break;
     }
@@ -381,32 +381,7 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
 
 static void handle_specific_vehicle_action(Vehicle* vehicle)
 {
-    const string type = vehicle->get_type();
-
-    if (type == "Мотоцикл")
-    {
-        Motorcycle* motorcycle = static_cast<Motorcycle*>(vehicle);
-        motorcycle->toggle_thermal_box();
-    }
-    else if (type == "Машина")
-    {
-        Car* car = static_cast<Car*>(vehicle);
-        if (car->is_trunk_spacious())
-        {
-            cout << "Багажник у машины ID " << car->get_id() << " вместительный (объём: "
-                << car->get_trunk_volume() << " л)." << endl;
-        }
-        else
-        {
-            cout << "Багажник у машины ID " << car->get_id() << " стандартный (объём: "
-                << car->get_trunk_volume() << " л)." << endl;
-        }
-    }
-    else if (type == "Грузовик")
-    {
-        Truck* truck = static_cast<Truck*>(vehicle);
-        truck->toggle_tail_lift();
-    }
+    vehicle->perform_specific_action();
 }
 
 static void handle_manage_order(DeliveryService& delivery_service)

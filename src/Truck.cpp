@@ -4,11 +4,22 @@
 
 using namespace std;
 
+double Truck::validate_capacity(double capacity)
+{
+    if (capacity <= 0 || capacity > MAX_CAPACITY)
+    {
+        cout << "Предупреждение: Некорректная грузоподъемность (" << capacity
+            << " кг) для грузовика. Установлено максимальное значение: " << MAX_CAPACITY << " кг." << endl;
+        return MAX_CAPACITY;
+    }
+    return capacity;
+}
+
 Truck::Truck()
-    : Vehicle(0, "Грузовик", Vehicle::MAX_TRUCK_CAPACITY, "", true), has_tail_lift(false) {}
+    : Vehicle(0, MAX_CAPACITY, "", true), has_tail_lift(false) {}
 
 Truck::Truck(int id, double capacity, const string& courier_name, bool is_available, bool has_tail_lift)
-    : Vehicle(id, "Грузовик", capacity, courier_name, is_available), has_tail_lift(has_tail_lift) {}
+    : Vehicle(id, validate_capacity(capacity), courier_name, is_available), has_tail_lift(has_tail_lift) {}
 
 bool Truck::get_has_tail_lift() const
 {
@@ -27,9 +38,24 @@ void Truck::toggle_tail_lift()
         << " изменен на: " << (has_tail_lift ? "Установлен" : "Снят") << endl;
 }
 
+string Truck::get_type() const
+{
+    return "Грузовик";
+}
+
+double Truck::get_max_capacity() const
+{
+    return MAX_CAPACITY;
+}
+
 string Truck::get_full_info() const
 {
     return Vehicle::get_full_info() + ". Гидроборт: " + (has_tail_lift ? "Есть" : "Нет");
+}
+
+void Truck::perform_specific_action()
+{
+    toggle_tail_lift();
 }
 
 ostream& operator<<(ostream& os, const Truck& truck)
@@ -41,7 +67,6 @@ ostream& operator<<(ostream& os, const Truck& truck)
 istream& operator>>(istream& is, Truck& truck)
 {
     is >> static_cast<Vehicle&>(truck);
-    truck.set_type("Грузовик");
 
     int choice;
     while (true)
