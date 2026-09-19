@@ -7,6 +7,7 @@
 #include <iostream>
 #include <windows.h>
 #include <string>
+#include <memory>
 
 using namespace std;
 
@@ -24,6 +25,8 @@ static void handle_specific_vehicle_action(Vehicle* vehicle);
 static void handle_manage_order(DeliveryService& delivery_service);
 static void handle_assign_order(DeliveryService& delivery_service);
 static void handle_complete_delivery(DeliveryService& delivery_service);
+static void handle_all_specific_actions(DeliveryService& delivery_service);
+static void handle_delivery_costs(DeliveryService& delivery_service);
 
 static void handle_compare_orders(DeliveryService& delivery_service);
 static void handle_compare_vehicles(DeliveryService& delivery_service);
@@ -67,6 +70,8 @@ void run_delivery_app()
         case 9: delivery_service.print_all_orders(); break;
         case 10: handle_assign_order(delivery_service); break;
         case 11: handle_complete_delivery(delivery_service); break;
+        case 12: handle_all_specific_actions(delivery_service); break;
+        case 13: handle_delivery_costs(delivery_service); break;
         case 0: cout << "Завершение работы." << endl; break;
         default: cout << "Неверный пункт меню!" << endl;
         }
@@ -81,9 +86,9 @@ static void setup_console_encoding()
 
 static void seed_data(DeliveryService& delivery_service)
 {
-    delivery_service += new Motorcycle(1, 25.0, "Иван", true, true);
-    delivery_service += new Car(2, 450.0, "Алексей", true, 500.0);
-    delivery_service += new Truck(3, 5000.0, "Дмитрий", true, true);
+    delivery_service += make_unique<Motorcycle>(1, 25.0, "Иван", true, true);
+    delivery_service += make_unique<Car>(2, 450.0, "Алексей", true, 500.0);
+    delivery_service += make_unique<Truck>(3, 5000.0, "Дмитрий", true, true);
 
     delivery_service += Order(101, "ул. Ленина, 5", 15.0, "Центральный");
     delivery_service += Order(102, "пр. Мира, 12", 250.0, "Северный");
@@ -105,6 +110,8 @@ static void print_menu()
         << "9. Показать все заказы\n"
         << "10. Назначить заказ на транспорт\n"
         << "11. Завершить доставку по ID транспорта\n"
+        << "12. Выполнить специфическое действие для всего транспорта (полиморфизм)\n"
+        << "13. Рассчитать стоимость доставки для всего транспорта (полиморфизм)\n"
         << "0. Выход\n";
 }
 
@@ -124,21 +131,8 @@ static void print_manage_vehicle_menu(Vehicle* vehicle)
         << "9. Изменить имя курьера\n"
         << "10. Изменить статус доступности\n";
 
-    if (vehicle->get_type() == "Мотоцикл")
-    {
-        cout << "[Специфические действия]\n"
-            << "11. Переключить наличие термокороба\n";
-    }
-    else if (vehicle->get_type() == "Машина")
-    {
-        cout << "[Специфические действия]\n"
-            << "11. Проверить вместительность багажника\n";
-    }
-    else if (vehicle->get_type() == "Грузовик")
-    {
-        cout << "[Специфические действия]\n"
-            << "11. Переключить наличие гидроборта\n";
-    }
+    cout << "[Специфические действия]\n"
+        << "11. " << vehicle->get_specific_action_name() << "\n";
 
     cout << "0. Назад в главное меню\n";
 }
@@ -179,30 +173,34 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
         cout << "Ошибка: введите число от 1 до 3!" << endl;
     }
 
+    unique_ptr<Vehicle> vehicle;
     switch (type_choice)
     {
     case 1:
     {
-        Motorcycle* motorcycle = new Motorcycle();
+        auto motorcycle = make_unique<Motorcycle>();
         cin >> *motorcycle;
-        delivery_service += motorcycle;
+        vehicle = std::move(motorcycle);
         break;
     }
     case 2:
     {
-        Car* car = new Car();
+        auto car = make_unique<Car>();
         cin >> *car;
-        delivery_service += car;
+        vehicle = std::move(car);
         break;
     }
     case 3:
     {
-        Truck* truck = new Truck();
+        auto truck = make_unique<Truck>();
         cin >> *truck;
-        delivery_service += truck;
+        vehicle = std::move(truck);
         break;
     }
     }
+
+    if (delivery_service.add_vehicle(std::move(vehicle)))
+        cout << "Транспорт успешно добавлен." << endl;
 }
 
 static void handle_add_order(DeliveryService& delivery_service)
@@ -430,6 +428,22 @@ static void handle_complete_delivery(DeliveryService& delivery_service)
 {
     int vehicle_id = read_int("Введите ID транспорта, завершившего доставку: ");
     delivery_service.complete_delivery(vehicle_id);
+}
+
+static void handle_all_specific_actions(DeliveryService& delivery_service)
+{
+    delivery_service.perform_all_specific_actions();
+}
+
+static void handle_delivery_costs(DeliveryService& delivery_service)
+{
+    double weight = read_double("Введите вес груза (кг): ");
+    if (weight <= 0)
+    {
+        cout << "Ошибка: вес должен быть положительным!" << endl;
+        return;
+    }
+    delivery_service.print_delivery_costs(weight);
 }
 
 static void handle_change_vehicle_id(DeliveryService& delivery_service, Vehicle* vehicle)

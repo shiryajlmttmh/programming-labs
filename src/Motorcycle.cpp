@@ -4,22 +4,11 @@
 
 using namespace std;
 
-double Motorcycle::validate_capacity(double capacity)
-{
-    if (capacity <= 0 || capacity > MAX_CAPACITY)
-    {
-        cout << "Предупреждение: Некорректная грузоподъемность (" << capacity
-            << " кг) для мотоцикла. Установлено максимальное значение: " << MAX_CAPACITY << " кг." << endl;
-        return MAX_CAPACITY;
-    }
-    return capacity;
-}
-
 Motorcycle::Motorcycle()
     : Vehicle(0, MAX_CAPACITY, "", true), has_thermal_box(false) {}
 
 Motorcycle::Motorcycle(int id, double capacity, const string& courier_name, bool is_available, bool has_thermal_box)
-    : Vehicle(id, validate_capacity(capacity), courier_name, is_available), has_thermal_box(has_thermal_box) {}
+    : Vehicle(id, validate_capacity(capacity, MAX_CAPACITY, "мотоцикла"), courier_name, is_available), has_thermal_box(has_thermal_box) {}
 
 bool Motorcycle::get_has_thermal_box() const
 {
@@ -58,10 +47,16 @@ void Motorcycle::perform_specific_action()
     toggle_thermal_box();
 }
 
-ostream& operator<<(ostream& os, const Motorcycle& motorcycle)
+string Motorcycle::get_specific_action_name() const
 {
-    os << motorcycle.get_full_info();
-    return os;
+    return "Переключить наличие термокороба";
+}
+
+double Motorcycle::calculate_delivery_cost(double order_weight) const
+{
+    double cost = BASE_COST + COST_PER_KG * order_weight;
+    if (has_thermal_box) cost += THERMAL_BOX_SURCHARGE;
+    return cost;
 }
 
 istream& operator>>(istream& is, Motorcycle& motorcycle)

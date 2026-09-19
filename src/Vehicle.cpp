@@ -15,6 +15,17 @@ Vehicle::Vehicle(int id, double capacity, const string& courier_name, bool is_av
     this->capacity = (capacity > 0) ? capacity : 0.0;
 }
 
+double Vehicle::validate_capacity(double capacity, double max_capacity, const string& type_name)
+{
+    if (capacity <= 0 || capacity > max_capacity)
+    {
+        cout << "Предупреждение: Некорректная грузоподъемность (" << capacity
+            << " кг) для " << type_name << ". Установлено максимальное значение: " << max_capacity << " кг." << endl;
+        return max_capacity;
+    }
+    return capacity;
+}
+
 bool Vehicle::assign_order(const Order& order)
 {
     if (!is_available)
@@ -73,7 +84,15 @@ void Vehicle::set_capacity(double new_capacity)
 }
 
 void Vehicle::set_courier_name(const string& new_courier_name) { courier_name = new_courier_name; }
-void Vehicle::set_is_available(bool new_status) { is_available = new_status; }
+void Vehicle::set_is_available(bool new_status)
+{
+    if (current_order_id != -1)
+    {
+        cout << "Ошибка: транспорт номер " << id << " выполняет заказ, изменить статус доступности нельзя!" << endl;
+        return;
+    }
+    is_available = new_status;
+}
 
 string Vehicle::get_full_info() const
 {
@@ -85,11 +104,6 @@ string Vehicle::get_full_info() const
         ". Курьер: " + courier_name +
         ". Грузоподъемность: " + capacity_str + " кг" +
         ". Статус: " + status_text;
-}
-
-void Vehicle::print_full_info() const
-{
-    cout << get_full_info() << endl;
 }
 
 bool Vehicle::operator==(const Vehicle& other) const { return this->id == other.id; }

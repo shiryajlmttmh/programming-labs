@@ -13,8 +13,12 @@ private:
     bool is_available;
     int current_order_id;
 
-public:
+protected:
     Vehicle(int id, double capacity, const std::string& courier_name, bool is_available = true);
+
+    static double validate_capacity(double capacity, double max_capacity, const std::string& type_name);
+
+public:
     virtual ~Vehicle() = default;
 
     bool assign_order(const Order& order);
@@ -35,8 +39,8 @@ public:
     virtual double get_max_capacity() const = 0;
     virtual std::string get_full_info() const;
     virtual void perform_specific_action() = 0;
-
-    void print_full_info() const;
+    virtual std::string get_specific_action_name() const = 0;
+    virtual double calculate_delivery_cost(double order_weight) const = 0;
 
     bool operator==(const Vehicle& other) const;
     bool operator!=(const Vehicle& other) const;

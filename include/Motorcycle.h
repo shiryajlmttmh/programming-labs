@@ -7,10 +7,11 @@ class Motorcycle : public Vehicle
 {
 private:
     static constexpr double MAX_CAPACITY = 50.0;
+    static constexpr double BASE_COST = 150.0;
+    static constexpr double COST_PER_KG = 10.0;
+    static constexpr double THERMAL_BOX_SURCHARGE = 50.0;
 
     bool has_thermal_box;
-
-    static double validate_capacity(double capacity);
 
 public:
     Motorcycle();
@@ -25,8 +26,8 @@ public:
     double get_max_capacity() const override;
     std::string get_full_info() const override;
     void perform_specific_action() override;
+    std::string get_specific_action_name() const override;
+    double calculate_delivery_cost(double order_weight) const override;
 
     friend std::istream& operator>>(std::istream& is, Motorcycle& motorcycle);
 };
-
-std::ostream& operator<<(std::ostream& os, const Motorcycle& motorcycle);

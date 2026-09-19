@@ -1,12 +1,8 @@
 #include "DeliveryService.h"
 #include <iostream>
+#include <format>
 
 using namespace std;
-
-DeliveryService::~DeliveryService()
-{
-    for (size_t i = 0; i < vehicles.size(); i++) delete vehicles[i];
-}
 
 void DeliveryService::print_all_vehicles() const
 {
@@ -17,6 +13,33 @@ void DeliveryService::print_all_vehicles() const
         cout << *vehicles[i] << endl;
 }
 
+void DeliveryService::perform_all_specific_actions()
+{
+    cout << "\n--- Специфические действия всего транспорта ---" << endl;
+    if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
+
+    // Динамический полиморфизм: для каждого элемента вызывается
+    // перегрузка perform_specific_action() фактического типа объекта
+    for (auto& vehicle : vehicles)
+        vehicle->perform_specific_action();
+}
+
+void DeliveryService::print_delivery_costs(double order_weight) const
+{
+    cout << "\n--- Стоимость доставки груза весом " << order_weight << " кг ---" << endl;
+    if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
+
+    for (const auto& vehicle : vehicles)
+    {
+        cout << vehicle->get_type() << " номер " << vehicle->get_id() << " (" << vehicle->get_courier_name() << "): ";
+
+        if (order_weight > vehicle->get_capacity())
+            cout << "груз превышает грузоподъемность (" << vehicle->get_capacity() << " кг)" << endl;
+        else
+            cout << std::format("{:.2f}", vehicle->calculate_delivery_cost(order_weight)) << " руб." << endl;
+    }
+}
+
 void DeliveryService::print_all_orders() const
 {
     cout << "\n--- Список активных заказов ---" << endl;
@@ -24,7 +47,7 @@ void DeliveryService::print_all_orders() const
     for (size_t i = 0; i < orders.size(); i++) cout << orders[i] << endl;
 }
 
-bool DeliveryService::add_vehicle(Vehicle* vehicle)
+bool DeliveryService::add_vehicle(unique_ptr<Vehicle> vehicle)
 {
     if (!vehicle) return false;
 
@@ -33,7 +56,7 @@ bool DeliveryService::add_vehicle(Vehicle* vehicle)
         cout << "Ошибка: транспорт с ID " << vehicle->get_id() << " уже существует!" << endl;
         return false;
     }
-    vehicles.push_back(vehicle);
+    vehicles.push_back(std::move(vehicle));
     return true;
 }
 
@@ -108,12 +131,25 @@ int DeliveryService::find_order_index_by_id(int id) const
 bool DeliveryService::assign_order_to_vehicle(int order_id)
 {
     int order_index = find_order_index_by_id(order_id);
-    if (order_index == -1) return false;
+    if (order_index == -1)
+    {
+        cout << "Ошибка: заказ с номером " << order_id << " не найден!" << endl;
+        return false;
+    }
 
-    if (orders[order_index].get_is_assigned()) return false;
+    if (orders[order_index].get_is_assigned())
+    {
+        cout << "Ошибка: заказ номер " << order_id << " уже назначен на транспорт!" << endl;
+        return false;
+    }
 
     int vehicle_index = find_optimal_vehicle_index(orders[order_index].get_weight());
-    if (vehicle_index == -1) return false;
+    if (vehicle_index == -1)
+    {
+        cout << "Ошибка: нет свободного транспорта, способного увезти заказ номер " << order_id
+            << " (" << orders[order_index].get_weight() << " кг)!" << endl;
+        return false;
+    }
 
     if (vehicles[vehicle_index]->assign_order(orders[order_index]))
     {
@@ -127,10 +163,18 @@ bool DeliveryService::assign_order_to_vehicle(int order_id)
 bool DeliveryService::complete_delivery(int vehicle_id)
 {
     int vehicle_index = find_vehicle_index_by_id(vehicle_id);
-    if (vehicle_index == -1) return false;
+    if (vehicle_index == -1)
+    {
+        cout << "Ошибка: транспорт с номером " << vehicle_id << " не найден!" << endl;
+        return false;
+    }
 
     int order_id = vehicles[vehicle_index]->get_current_order_id();
-    if (order_id == -1) return false;
+    if (order_id == -1)
+    {
+        cout << "Ошибка: у транспорта номер " << vehicle_id << " нет активного заказа!" << endl;
+        return false;
+    }
 
     int order_index = find_order_index_by_id(order_id);
 
@@ -144,7 +188,7 @@ bool DeliveryService::complete_delivery(int vehicle_id)
 Vehicle* DeliveryService::get_vehicle(int id)
 {
     int index = find_vehicle_index_by_id(id);
-    if (index != -1) return vehicles[index];
+    if (index != -1) return vehicles[index].get();
     return nullptr;
 }
 
@@ -159,6 +203,6 @@ bool DeliveryService::check_vehicle_exists(int id) const { return find_vehicle_i
 bool DeliveryService::check_order_exists(int id) const { return find_order_index_by_id(id) != -1; }
 
 DeliveryService& DeliveryService::operator+=(const Order& order) { this->add_order(order); return *this; }
-DeliveryService& DeliveryService::operator+=(Vehicle* vehicle) { this->add_vehicle(vehicle); return *this; }
+DeliveryService& DeliveryService::operator+=(unique_ptr<Vehicle> vehicle) { this->add_vehicle(std::move(vehicle)); return *this; }
 DeliveryService& DeliveryService::operator-=(int order_id) { this->remove_order_by_id(order_id); return *this; }
 DeliveryService& DeliveryService::operator-=(const Order& order) { return *this -= order.get_id(); }

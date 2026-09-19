@@ -5,22 +5,11 @@
 
 using namespace std;
 
-double Car::validate_capacity(double capacity)
-{
-    if (capacity <= 0 || capacity > MAX_CAPACITY)
-    {
-        cout << "Предупреждение: Некорректная грузоподъемность (" << capacity
-            << " кг) для машины. Установлено максимальное значение: " << MAX_CAPACITY << " кг." << endl;
-        return MAX_CAPACITY;
-    }
-    return capacity;
-}
-
 Car::Car()
-    : Vehicle(0, MAX_CAPACITY, "", true), trunk_volume(MIN_TRUNK_VOLUME) {}
+    : Vehicle(0, MAX_CAPACITY, "", true), trunk_volume(DEFAULT_TRUNK_VOLUME) {}
 
 Car::Car(int id, double capacity, const string& courier_name, bool is_available, double trunk_volume)
-    : Vehicle(id, validate_capacity(capacity), courier_name, is_available)
+    : Vehicle(id, validate_capacity(capacity, MAX_CAPACITY, "машины"), courier_name, is_available)
 {
     if (trunk_volume >= MIN_TRUNK_VOLUME && trunk_volume <= MAX_TRUNK_VOLUME)
     {
@@ -29,8 +18,8 @@ Car::Car(int id, double capacity, const string& courier_name, bool is_available,
     else
     {
         cout << "Предупреждение: Некорректный объём багажника (" << trunk_volume
-            << " л). Установлено значение по умолчанию: " << MIN_TRUNK_VOLUME << " л." << endl;
-        this->trunk_volume = MIN_TRUNK_VOLUME;
+            << " л). Установлено значение по умолчанию: " << DEFAULT_TRUNK_VOLUME << " л." << endl;
+        this->trunk_volume = DEFAULT_TRUNK_VOLUME;
     }
 }
 
@@ -86,10 +75,16 @@ void Car::perform_specific_action()
     }
 }
 
-ostream& operator<<(ostream& os, const Car& car)
+string Car::get_specific_action_name() const
 {
-    os << car.get_full_info();
-    return os;
+    return "Проверить вместительность багажника";
+}
+
+double Car::calculate_delivery_cost(double order_weight) const
+{
+    double cost = BASE_COST + COST_PER_KG * order_weight;
+    if (is_trunk_spacious()) cost *= SPACIOUS_TRUNK_DISCOUNT;
+    return cost;
 }
 
 istream& operator>>(istream& is, Car& car)

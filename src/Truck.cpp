@@ -4,22 +4,11 @@
 
 using namespace std;
 
-double Truck::validate_capacity(double capacity)
-{
-    if (capacity <= 0 || capacity > MAX_CAPACITY)
-    {
-        cout << "Предупреждение: Некорректная грузоподъемность (" << capacity
-            << " кг) для грузовика. Установлено максимальное значение: " << MAX_CAPACITY << " кг." << endl;
-        return MAX_CAPACITY;
-    }
-    return capacity;
-}
-
 Truck::Truck()
     : Vehicle(0, MAX_CAPACITY, "", true), has_tail_lift(false) {}
 
 Truck::Truck(int id, double capacity, const string& courier_name, bool is_available, bool has_tail_lift)
-    : Vehicle(id, validate_capacity(capacity), courier_name, is_available), has_tail_lift(has_tail_lift) {}
+    : Vehicle(id, validate_capacity(capacity, MAX_CAPACITY, "грузовика"), courier_name, is_available), has_tail_lift(has_tail_lift) {}
 
 bool Truck::get_has_tail_lift() const
 {
@@ -58,10 +47,16 @@ void Truck::perform_specific_action()
     toggle_tail_lift();
 }
 
-ostream& operator<<(ostream& os, const Truck& truck)
+string Truck::get_specific_action_name() const
 {
-    os << truck.get_full_info();
-    return os;
+    return "Переключить наличие гидроборта";
+}
+
+double Truck::calculate_delivery_cost(double order_weight) const
+{
+    double cost = BASE_COST + COST_PER_KG * order_weight;
+    if (has_tail_lift) cost += TAIL_LIFT_SURCHARGE;
+    return cost;
 }
 
 istream& operator>>(istream& is, Truck& truck)
@@ -72,10 +67,7 @@ istream& operator>>(istream& is, Truck& truck)
     while (true)
     {
         choice = read_int("Есть ли гидроборт? (1 - Да, 0 - Нет): ");
-        if (choice == 0 || choice == 1)
-        {
-            break;
-        }
+        if (choice == 0 || choice == 1) break;
         cout << "Ошибка: введите 1 (Да) или 0 (Нет)!" << endl;
     }
 

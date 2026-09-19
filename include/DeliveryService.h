@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include "Vehicle.h"
 #include "Order.h"
 
 class DeliveryService
 {
 private:
-    std::vector<Vehicle*> vehicles;
+    std::vector<std::unique_ptr<Vehicle>> vehicles;
     std::vector<Order> orders;
 
     int find_vehicle_index_by_id(int id) const;
@@ -14,12 +15,13 @@ private:
     int find_optimal_vehicle_index(double order_weight) const;
 
 public:
-    ~DeliveryService();
-
     void print_all_vehicles() const;
     void print_all_orders() const;
 
-    bool add_vehicle(Vehicle* vehicle);
+    void perform_all_specific_actions();
+    void print_delivery_costs(double order_weight) const;
+
+    bool add_vehicle(std::unique_ptr<Vehicle> vehicle);
     bool add_order(const Order& order);
     bool assign_order_to_vehicle(int order_id);
     bool remove_order_by_id(int order_id);
@@ -31,7 +33,7 @@ public:
     bool check_order_exists(int id) const;
 
     DeliveryService& operator+=(const Order& order);
-    DeliveryService& operator+=(Vehicle* vehicle);
+    DeliveryService& operator+=(std::unique_ptr<Vehicle> vehicle);
     DeliveryService& operator-=(int order_id);
     DeliveryService& operator-=(const Order& order);
 };

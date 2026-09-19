@@ -7,10 +7,11 @@ class Truck : public Vehicle
 {
 private:
     static constexpr double MAX_CAPACITY = 10000.0;
+    static constexpr double BASE_COST = 800.0;
+    static constexpr double COST_PER_KG = 2.0;
+    static constexpr double TAIL_LIFT_SURCHARGE = 200.0;
 
     bool has_tail_lift;
-
-    static double validate_capacity(double capacity);
 
 public:
     Truck();
@@ -25,8 +26,8 @@ public:
     double get_max_capacity() const override;
     std::string get_full_info() const override;
     void perform_specific_action() override;
+    std::string get_specific_action_name() const override;
+    double calculate_delivery_cost(double order_weight) const override;
 
     friend std::istream& operator>>(std::istream& is, Truck& truck);
-};
-
-std::ostream& operator<<(std::ostream& os, const Truck& truck);
+};  
