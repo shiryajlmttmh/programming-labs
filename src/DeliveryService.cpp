@@ -18,10 +18,8 @@ void DeliveryService::perform_all_specific_actions()
     cout << "\n--- Специфические действия всего транспорта ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
 
-    // Динамический полиморфизм: для каждого элемента вызывается
-    // перегрузка perform_specific_action() фактического типа объекта
-    for (auto& vehicle : vehicles)
-        vehicle->perform_specific_action();
+    for (size_t i = 0; i < vehicles.size(); i++)
+        vehicles[i]->perform_specific_action();
 }
 
 void DeliveryService::print_delivery_costs(double order_weight) const
@@ -29,14 +27,14 @@ void DeliveryService::print_delivery_costs(double order_weight) const
     cout << "\n--- Стоимость доставки груза весом " << order_weight << " кг ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
 
-    for (const auto& vehicle : vehicles)
+    for (size_t i = 0; i < vehicles.size(); i++)
     {
-        cout << vehicle->get_type() << " номер " << vehicle->get_id() << " (" << vehicle->get_courier_name() << "): ";
+        cout << vehicles[i]->get_type() << " номер " << vehicles[i]->get_id() << " (" << vehicles[i]->get_courier_name() << "): ";
 
-        if (order_weight > vehicle->get_capacity())
-            cout << "груз превышает грузоподъемность (" << vehicle->get_capacity() << " кг)" << endl;
+        if (order_weight > vehicles[i]->get_capacity())
+            cout << "груз превышает грузоподъемность (" << vehicles[i]->get_capacity() << " кг)" << endl;
         else
-            cout << std::format("{:.2f}", vehicle->calculate_delivery_cost(order_weight)) << " руб." << endl;
+            cout << std::format("{:.2f}", vehicles[i]->calculate_delivery_cost(order_weight)) << " руб." << endl;
     }
 }
 

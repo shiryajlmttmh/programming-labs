@@ -166,10 +166,7 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
     while (true)
     {
         type_choice = read_int("Ваш выбор: ");
-        if (type_choice >= 1 && type_choice <= 3)
-        {
-            break;
-        }
+        if (type_choice >= 1 && type_choice <= 3) break;
         cout << "Ошибка: введите число от 1 до 3!" << endl;
     }
 
@@ -178,21 +175,21 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
     {
     case 1:
     {
-        auto motorcycle = make_unique<Motorcycle>();
+        unique_ptr<Motorcycle> motorcycle = make_unique<Motorcycle>();
         cin >> *motorcycle;
         vehicle = std::move(motorcycle);
         break;
     }
     case 2:
     {
-        auto car = make_unique<Car>();
+        unique_ptr<Car> car = make_unique<Car>();
         cin >> *car;
         vehicle = std::move(car);
         break;
     }
     case 3:
     {
-        auto truck = make_unique<Truck>();
+        unique_ptr<Truck> truck = make_unique<Truck>();
         cin >> *truck;
         vehicle = std::move(truck);
         break;
