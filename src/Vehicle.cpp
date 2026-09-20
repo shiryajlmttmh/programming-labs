@@ -102,7 +102,7 @@ void Vehicle::set_is_available(bool new_status)
 string Vehicle::get_full_info() const
 {
     string status_text = is_available ? "Свободен" : ("Занят (Заказ номер " + to_string(current_order_id) + ")");
-    string capacity_str = std::format("{:.1f}", capacity);
+    string capacity_str = format("{:.1f}", capacity);
 
     return "Транспорт номер " + to_string(id) +
         " (" + get_type() + ")" +

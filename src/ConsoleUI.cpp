@@ -182,26 +182,26 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
     {
         unique_ptr<Motorcycle> motorcycle = make_unique<Motorcycle>();
         cin >> *motorcycle;
-        vehicle = std::move(motorcycle);
+        vehicle = move(motorcycle);
         break;
     }
     case 2:
     {
         unique_ptr<Car> car = make_unique<Car>();
         cin >> *car;
-        vehicle = std::move(car);
+        vehicle = move(car);
         break;
     }
     case 3:
     {
         unique_ptr<Truck> truck = make_unique<Truck>();
         cin >> *truck;
-        vehicle = std::move(truck);
+        vehicle = move(truck);
         break;
     }
     }
 
-    if (delivery_service.add_vehicle(std::move(vehicle)))
+    if (delivery_service.add_vehicle(move(vehicle)))
         cout << "Транспорт успешно добавлен." << endl;
 }
 
@@ -403,7 +403,7 @@ static void handle_vehicle_delivery_cost(Vehicle* vehicle)
 
     cout << "Стоимость доставки груза весом " << weight << " кг транспортом номер " << vehicle->get_id()
         << " (" << vehicle->get_type() << "): "
-        << std::format("{:.2f}", vehicle->calculate_delivery_cost(weight)) << " руб." << endl;
+        << format("{:.2f}", vehicle->calculate_delivery_cost(weight)) << " руб." << endl;
 }
 
 static void handle_manage_order(DeliveryService& delivery_service)

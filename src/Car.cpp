@@ -58,7 +58,7 @@ double Car::get_max_capacity() const
 
 string Car::get_full_info() const
 {
-    return Vehicle::get_full_info() + ". Объём багажника: " + std::format("{:.1f}", trunk_volume) + " л";
+    return Vehicle::get_full_info() + ". Объём багажника: " + format("{:.1f}", trunk_volume) + " л";
 }
 
 void Car::perform_specific_action()

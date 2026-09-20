@@ -34,7 +34,7 @@ void DeliveryService::print_delivery_costs(double order_weight) const
         if (!vehicles[i]->can_carry(order_weight))
             cout << "груз превышает грузоподъемность (" << vehicles[i]->get_capacity() << " кг)" << endl;
         else
-            cout << std::format("{:.2f}", vehicles[i]->calculate_delivery_cost(order_weight)) << " руб." << endl;
+            cout << format("{:.2f}", vehicles[i]->calculate_delivery_cost(order_weight)) << " руб." << endl;
     }
 }
 
@@ -54,7 +54,7 @@ bool DeliveryService::add_vehicle(unique_ptr<Vehicle> vehicle)
         cout << "Ошибка: транспорт с ID " << vehicle->get_id() << " уже существует!" << endl;
         return false;
     }
-    vehicles.push_back(std::move(vehicle));
+    vehicles.push_back(move(vehicle));
     return true;
 }
 
@@ -201,6 +201,6 @@ bool DeliveryService::check_vehicle_exists(int id) const { return find_vehicle_i
 bool DeliveryService::check_order_exists(int id) const { return find_order_index_by_id(id) != -1; }
 
 DeliveryService& DeliveryService::operator+=(const Order& order) { this->add_order(order); return *this; }
-DeliveryService& DeliveryService::operator+=(unique_ptr<Vehicle> vehicle) { this->add_vehicle(std::move(vehicle)); return *this; }
+DeliveryService& DeliveryService::operator+=(unique_ptr<Vehicle> vehicle) { this->add_vehicle(move(vehicle)); return *this; }
 DeliveryService& DeliveryService::operator-=(int order_id) { this->remove_order_by_id(order_id); return *this; }
 DeliveryService& DeliveryService::operator-=(const Order& order) { return *this -= order.get_id(); }

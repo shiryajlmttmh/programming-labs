@@ -48,7 +48,7 @@ void Order::set_is_assigned(bool status) { is_assigned = status; }
 string Order::get_full_info() const
 {
     string status_text = is_assigned ? "Доставляется" : "Ожидает назначения";
-    string weight_str = std::format("{:.1f}", weight);
+    string weight_str = format("{:.1f}", weight);
 
     return "Заказ номер " + to_string(id) +
         ". Адрес: " + address +
