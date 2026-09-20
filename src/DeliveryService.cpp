@@ -31,7 +31,7 @@ void DeliveryService::print_delivery_costs(double order_weight) const
     {
         cout << vehicles[i]->get_type() << " номер " << vehicles[i]->get_id() << " (" << vehicles[i]->get_courier_name() << "): ";
 
-        if (order_weight > vehicles[i]->get_capacity())
+        if (!vehicles[i]->can_carry(order_weight))
             cout << "груз превышает грузоподъемность (" << vehicles[i]->get_capacity() << " кг)" << endl;
         else
             cout << std::format("{:.2f}", vehicles[i]->calculate_delivery_cost(order_weight)) << " руб." << endl;
@@ -97,7 +97,7 @@ int DeliveryService::find_optimal_vehicle_index(double order_weight) const
     for (size_t i = 0; i < vehicles.size(); i++)
     {
         double curr_capacity = vehicles[i]->get_capacity();
-        if (vehicles[i]->get_is_available() && curr_capacity >= order_weight)
+        if (vehicles[i]->get_is_available() && vehicles[i]->can_carry(order_weight))
         {
             if (vehicle_index == -1 || curr_capacity < min_capacity)
             {

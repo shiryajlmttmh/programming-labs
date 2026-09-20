@@ -24,6 +24,8 @@ public:
     bool assign_order(const Order& order);
     void complete_delivery();
 
+    bool can_carry(double cargo_weight) const;
+
     int get_id() const;
     double get_capacity() const;
     std::string get_courier_name() const;

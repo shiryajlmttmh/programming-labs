@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <string>
 #include <memory>
+#include <format>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ static void handle_add_order(DeliveryService& delivery_service);
 static void handle_remove_order(DeliveryService& delivery_service);
 static void handle_manage_vehicle(DeliveryService& delivery_service);
 static void handle_specific_vehicle_action(Vehicle* vehicle);
+static void handle_vehicle_delivery_cost(Vehicle* vehicle);
 static void handle_manage_order(DeliveryService& delivery_service);
 static void handle_assign_order(DeliveryService& delivery_service);
 static void handle_complete_delivery(DeliveryService& delivery_service);
@@ -133,6 +135,9 @@ static void print_manage_vehicle_menu(Vehicle* vehicle)
 
     cout << "[Специфические действия]\n"
         << "11. " << vehicle->get_specific_action_name() << "\n";
+
+    cout << "[Расчёты]\n"
+        << "12. Рассчитать стоимость доставки\n";
 
     cout << "0. Назад в главное меню\n";
 }
@@ -368,6 +373,7 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
         case 9:  handle_change_vehicle_courier(vehicle); break;
         case 10: handle_change_vehicle_status(vehicle); break;
         case 11: handle_specific_vehicle_action(vehicle); break;
+        case 12: handle_vehicle_delivery_cost(vehicle); break;
         case 0:  break;
         default: cout << "Неверный пункт меню!" << endl;
         }
@@ -377,6 +383,27 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
 static void handle_specific_vehicle_action(Vehicle* vehicle)
 {
     vehicle->perform_specific_action();
+}
+
+static void handle_vehicle_delivery_cost(Vehicle* vehicle)
+{
+    double weight = read_double("Введите вес груза (кг): ");
+    if (weight <= 0)
+    {
+        cout << "Ошибка: вес должен быть положительным!" << endl;
+        return;
+    }
+
+    if (!vehicle->can_carry(weight))
+    {
+        cout << "Ошибка: груз (" << weight << " кг) превышает грузоподъемность транспорта ("
+            << vehicle->get_capacity() << " кг)!" << endl;
+        return;
+    }
+
+    cout << "Стоимость доставки груза весом " << weight << " кг транспортом номер " << vehicle->get_id()
+        << " (" << vehicle->get_type() << "): "
+        << std::format("{:.2f}", vehicle->calculate_delivery_cost(weight)) << " руб." << endl;
 }
 
 static void handle_manage_order(DeliveryService& delivery_service)

@@ -26,6 +26,11 @@ double Vehicle::validate_capacity(double capacity, double max_capacity, const st
     return capacity;
 }
 
+bool Vehicle::can_carry(double cargo_weight) const
+{
+    return cargo_weight <= capacity;
+}
+
 bool Vehicle::assign_order(const Order& order)
 {
     if (!is_available)
@@ -34,7 +39,7 @@ bool Vehicle::assign_order(const Order& order)
         return false;
     }
 
-    if (order.get_weight() > capacity)
+    if (!can_carry(order.get_weight()))
     {
         cout << "Ошибка: вес заказа номер " << order.get_id() << " (" << order.get_weight()
             << " кг) превышает грузоподъемность транспорта (" << capacity << " кг)!" << endl;
