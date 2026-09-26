@@ -31,10 +31,12 @@ static void print_demo_menu()
         << "4. Добавить машину в коллекцию\n"
         << "5. Удалить заказ по индексу\n"
         << "6. Удалить машину по индексу\n"
-        << "7. Найти заказ тяжелее заданного веса\n"
-        << "8. Найти машину с вместительным багажником\n"
-        << "9. Очистить коллекцию заказов\n"
-        << "10. Очистить коллекцию машин\n"
+        << "7. Найти заказ тяжелее заданного веса (поиск по критерию)\n"
+        << "8. Найти машину с вместительным багажником (поиск по критерию)\n"
+        << "9. Проверить наличие заказа с указанным ID (поиск по значению)\n"
+        << "10. Проверить наличие машины с указанным ID (поиск по значению)\n"
+        << "11. Очистить коллекцию заказов\n"
+        << "12. Очистить коллекцию машин\n"
         << "0. Назад в главное меню\n";
 }
 
@@ -99,7 +101,8 @@ void run_collection_demo_menu()
         case 7:
         {
             double threshold = read_double("Введите пороговый вес (кг): ");
-            const Order* found = find_if_matching(orders_demo, [threshold](const Order& order) { return order.get_weight() > threshold; });
+            const Order* found = find_if_matching(orders_demo,
+                [threshold](const Order& order) { return order.get_weight() > threshold; });
 
             if (found != nullptr)
                 cout << "Найден заказ: " << *found << endl;
@@ -110,7 +113,8 @@ void run_collection_demo_menu()
 
         case 8:
         {
-            const Car* found = find_if_matching(cars_demo, [](const Car& car) { return car.is_trunk_spacious(); });
+            const Car* found = find_if_matching(cars_demo,
+                [](const Car& car) { return car.is_trunk_spacious(); });
 
             if (found != nullptr)
                 cout << "Найдена машина с вместительным багажником: " << found->get_full_info() << endl;
@@ -120,11 +124,37 @@ void run_collection_demo_menu()
         }
 
         case 9:
+        {
+            int id = read_int("Введите ID заказа для поиска: ");
+            Order candidate(id, "", Order().get_weight(), "");
+
+            int index = orders_demo.find_index(candidate);
+            if (index != -1)
+                cout << "Заказ с ID " << id << " найден в коллекции на позиции " << index << "." << endl;
+            else
+                cout << "Заказ с ID " << id << " в коллекции не найден." << endl;
+            break;
+        }
+
+        case 10:
+        {
+            int id = read_int("Введите ID машины для поиска: ");
+            Car candidate(id, 1.0, "", true, 100.0);
+
+            int index = cars_demo.find_index(candidate);
+            if (index != -1)
+                cout << "Машина с ID " << id << " найдена в коллекции на позиции " << index << "." << endl;
+            else
+                cout << "Машина с ID " << id << " в коллекции не найдена." << endl;
+            break;
+        }
+
+        case 11:
             orders_demo.clear_collection();
             cout << "Коллекция заказов очищена." << endl;
             break;
 
-        case 10:
+        case 12:
             cars_demo.clear_collection();
             cout << "Коллекция машин очищена." << endl;
             break;

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <iostream>
+#include <stdexcept>
 
 template <typename T>
 class Collection
@@ -14,6 +15,9 @@ public:
 
     const T& get_item_by_index(size_t index) const;
     T& get_item_by_index(size_t index);
+
+    bool contains(const T& target) const;
+    int find_index(const T& target) const;
 
     size_t get_items_count() const;
     void clear_collection();
@@ -48,6 +52,21 @@ template <typename T>
 T& Collection<T>::get_item_by_index(size_t index)
 {
     return items.at(index);
+}
+
+template <typename T>
+int Collection<T>::find_index(const T& target) const
+{
+    for (size_t i = 0; i < items.size(); i++)
+        if (items[i] == target) return static_cast<int>(i);
+
+    return -1;
+}
+
+template <typename T>
+bool Collection<T>::contains(const T& target) const
+{
+    return find_index(target) != -1;
 }
 
 template <typename T>
