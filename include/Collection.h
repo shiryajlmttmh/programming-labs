@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <iostream>
-#include <stdexcept>
 
 template <typename T>
 class Collection
@@ -12,7 +11,10 @@ private:
 public:
     void add_item(const T& item);
     void remove_item_by_index(size_t index);
+
     const T& get_item_by_index(size_t index) const;
+    T& get_item_by_index(size_t index);
+
     size_t get_items_count() const;
     void clear_collection();
     void print_collection() const;
@@ -38,6 +40,12 @@ void Collection<T>::remove_item_by_index(size_t index)
 
 template <typename T>
 const T& Collection<T>::get_item_by_index(size_t index) const
+{
+    return items.at(index);
+}
+
+template <typename T>
+T& Collection<T>::get_item_by_index(size_t index)
 {
     return items.at(index);
 }

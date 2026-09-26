@@ -41,8 +41,8 @@ void DeliveryService::print_delivery_costs(double order_weight) const
 void DeliveryService::print_all_orders() const
 {
     cout << "\n--- Список активных заказов ---" << endl;
-    if (orders.empty()) { cout << "Список пуст." << endl; return; }
-    for (size_t i = 0; i < orders.size(); i++) cout << orders[i] << endl;
+    if (orders.get_items_count() == 0) { cout << "Список пуст." << endl; return; }
+    orders.print_collection();
 }
 
 bool DeliveryService::add_vehicle(unique_ptr<Vehicle> vehicle)
@@ -65,7 +65,7 @@ bool DeliveryService::add_order(const Order& order)
         cout << "Ошибка: заказ с ID " << order.get_id() << " уже существует!" << endl;
         return false;
     }
-    orders.push_back(order);
+    orders.add_item(order);
     return true;
 }
 
@@ -78,13 +78,13 @@ bool DeliveryService::remove_order_by_id(int order_id)
         return false;
     }
 
-    if (orders[index].get_is_assigned())
+    if (orders.get_item_by_index(static_cast<size_t>(index)).get_is_assigned())
     {
         cout << "Ошибка: нельзя удалить заказ номер " << order_id << ", так как он находится в процессе доставки!" << endl;
         return false;
     }
 
-    orders.erase(orders.begin() + index);
+    orders.remove_item_by_index(static_cast<size_t>(index));
     cout << "Заказ номер " << order_id << " успешно удален из системы." << endl;
     return true;
 }
@@ -120,8 +120,8 @@ int DeliveryService::find_vehicle_index_by_id(int id) const
 
 int DeliveryService::find_order_index_by_id(int id) const
 {
-    for (size_t i = 0; i < orders.size(); i++)
-        if (orders[i].get_id() == id) return static_cast<int>(i);
+    for (size_t i = 0; i < orders.get_items_count(); i++)
+        if (orders.get_item_by_index(i).get_id() == id) return static_cast<int>(i);
 
     return -1;
 }
@@ -135,23 +135,25 @@ bool DeliveryService::assign_order_to_vehicle(int order_id)
         return false;
     }
 
-    if (orders[order_index].get_is_assigned())
+    Order& order = orders.get_item_by_index(static_cast<size_t>(order_index));
+
+    if (order.get_is_assigned())
     {
         cout << "Ошибка: заказ номер " << order_id << " уже назначен на транспорт!" << endl;
         return false;
     }
 
-    int vehicle_index = find_optimal_vehicle_index(orders[order_index].get_weight());
+    int vehicle_index = find_optimal_vehicle_index(order.get_weight());
     if (vehicle_index == -1)
     {
         cout << "Ошибка: нет свободного транспорта, способного увезти заказ номер " << order_id
-            << " (" << orders[order_index].get_weight() << " кг)!" << endl;
+            << " (" << order.get_weight() << " кг)!" << endl;
         return false;
     }
 
-    if (vehicles[vehicle_index]->assign_order(orders[order_index]))
+    if (vehicles[vehicle_index]->assign_order(order))
     {
-        orders[order_index].set_is_assigned(true);
+        order.set_is_assigned(true);
         return true;
     }
 
@@ -178,7 +180,7 @@ bool DeliveryService::complete_delivery(int vehicle_id)
 
     vehicles[vehicle_index]->complete_delivery();
 
-    if (order_index != -1) orders.erase(orders.begin() + order_index);
+    if (order_index != -1) orders.remove_item_by_index(static_cast<size_t>(order_index));
 
     return true;
 }
@@ -193,7 +195,7 @@ Vehicle* DeliveryService::get_vehicle(int id)
 Order* DeliveryService::get_order(int id)
 {
     int index = find_order_index_by_id(id);
-    if (index != -1) return &orders[index];
+    if (index != -1) return &orders.get_item_by_index(static_cast<size_t>(index));
     return nullptr;
 }
 

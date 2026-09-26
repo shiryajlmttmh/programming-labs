@@ -3,12 +3,13 @@
 #include <memory>
 #include "Vehicle.h"
 #include "Order.h"
+#include "Collection.h"
 
 class DeliveryService
 {
 private:
     std::vector<std::unique_ptr<Vehicle>> vehicles;
-    std::vector<Order> orders;
+    Collection<Order> orders;
 
     int find_vehicle_index_by_id(int id) const;
     int find_order_index_by_id(int id) const;
