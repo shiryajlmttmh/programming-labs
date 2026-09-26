@@ -7,6 +7,55 @@
 
 using namespace std;
 
+static void seed_collection_demo_data(Collection<Order>& orders_demo, Collection<Car>& cars_demo);
+static void print_demo_menu();
+
+static void handle_print_orders(const Collection<Order>& orders_demo);
+static void handle_print_cars(const Collection<Car>& cars_demo);
+static void handle_add_order_demo(Collection<Order>& orders_demo);
+static void handle_add_car_demo(Collection<Car>& cars_demo);
+static void handle_remove_order_demo(Collection<Order>& orders_demo);
+static void handle_remove_car_demo(Collection<Car>& cars_demo);
+static void handle_find_heavy_order(const Collection<Order>& orders_demo);
+static void handle_find_spacious_car(const Collection<Car>& cars_demo);
+static void handle_find_order_by_id(const Collection<Order>& orders_demo);
+static void handle_find_car_by_id(const Collection<Car>& cars_demo);
+static void handle_clear_orders_demo(Collection<Order>& orders_demo);
+static void handle_clear_cars_demo(Collection<Car>& cars_demo);
+
+void run_collection_demo_menu()
+{
+    Collection<Order> orders_demo;
+    Collection<Car> cars_demo;
+
+    seed_collection_demo_data(orders_demo, cars_demo);
+
+    int menu_choice = -1;
+    while (menu_choice != 0)
+    {
+        print_demo_menu();
+        menu_choice = read_int("Выберите действие: ");
+
+        switch (menu_choice)
+        {
+        case 1:  handle_print_orders(orders_demo); break;
+        case 2:  handle_print_cars(cars_demo); break;
+        case 3:  handle_add_order_demo(orders_demo); break;
+        case 4:  handle_add_car_demo(cars_demo); break;
+        case 5:  handle_remove_order_demo(orders_demo); break;
+        case 6:  handle_remove_car_demo(cars_demo); break;
+        case 7:  handle_find_heavy_order(orders_demo); break;
+        case 8:  handle_find_spacious_car(cars_demo); break;
+        case 9:  handle_find_order_by_id(orders_demo); break;
+        case 10: handle_find_car_by_id(cars_demo); break;
+        case 11: handle_clear_orders_demo(orders_demo); break;
+        case 12: handle_clear_cars_demo(cars_demo); break;
+        case 0:  break;
+        default: cout << "Ошибка: некорректный пункт меню!" << endl;
+        }
+    }
+}
+
 static void seed_collection_demo_data(Collection<Order>& orders_demo, Collection<Car>& cars_demo)
 {
     orders_demo.add_item(Order(1, "ул. Ленина, 10", 5.5, "Центральный"));
@@ -40,132 +89,102 @@ static void print_demo_menu()
         << "0. Назад в главное меню\n";
 }
 
-void run_collection_demo_menu()
+static void handle_print_orders(const Collection<Order>& orders_demo)
 {
-    Collection<Order> orders_demo;
-    Collection<Car> cars_demo;
+    cout << "\n--- Заказы (" << orders_demo.get_items_count() << ") ---" << endl;
+    orders_demo.print_collection();
+}
 
-    seed_collection_demo_data(orders_demo, cars_demo);
+static void handle_print_cars(const Collection<Car>& cars_demo)
+{
+    cout << "\n--- Машины (" << cars_demo.get_items_count() << ") ---" << endl;
+    cars_demo.print_collection();
+}
 
-    bool running = true;
-    while (running)
-    {
-        print_demo_menu();
-        int choice = read_int("Выберите действие: ");
+static void handle_add_order_demo(Collection<Order>& orders_demo)
+{
+    int id = read_int("Введите ID заказа: ");
+    double weight = read_double("Введите вес (кг): ");
+    orders_demo.add_item(Order(id, "Демо-адрес", weight, "Демо-район"));
+    cout << "Заказ добавлен в коллекцию." << endl;
+}
 
-        switch (choice)
-        {
-        case 1:
-            cout << "\n--- Заказы (" << orders_demo.get_items_count() << ") ---" << endl;
-            orders_demo.print_collection();
-            break;
+static void handle_add_car_demo(Collection<Car>& cars_demo)
+{
+    int id = read_int("Введите ID машины: ");
+    double capacity = read_double("Введите грузоподъёмность (кг): ");
+    double trunk = read_double("Введите объём багажника (л): ");
+    cars_demo.add_item(Car(id, capacity, "Демо-курьер", true, trunk));
+    cout << "Машина добавлена в коллекцию." << endl;
+}
 
-        case 2:
-            cout << "\n--- Машины (" << cars_demo.get_items_count() << ") ---" << endl;
-            cars_demo.print_collection();
-            break;
+static void handle_remove_order_demo(Collection<Order>& orders_demo)
+{
+    size_t index = static_cast<size_t>(read_int("Введите индекс заказа для удаления: "));
+    orders_demo.remove_item_by_index(index);
+}
 
-        case 3:
-        {
-            int id = read_int("Введите ID заказа: ");
-            double weight = read_double("Введите вес (кг): ");
-            orders_demo.add_item(Order(id, "Демо-адрес", weight, "Демо-район"));
-            cout << "Заказ добавлен в коллекцию." << endl;
-            break;
-        }
+static void handle_remove_car_demo(Collection<Car>& cars_demo)
+{
+    size_t index = static_cast<size_t>(read_int("Введите индекс машины для удаления: "));
+    cars_demo.remove_item_by_index(index);
+}
 
-        case 4:
-        {
-            int id = read_int("Введите ID машины: ");
-            double capacity = read_double("Введите грузоподъёмность (кг): ");
-            double trunk = read_double("Введите объём багажника (л): ");
-            cars_demo.add_item(Car(id, capacity, "Демо-курьер", true, trunk));
-            cout << "Машина добавлена в коллекцию." << endl;
-            break;
-        }
+static void handle_find_heavy_order(const Collection<Order>& orders_demo)
+{
+    double threshold = read_double("Введите пороговый вес (кг): ");
+    const Order* found = find_if_matching(orders_demo,
+        [threshold](const Order& order) { return order.get_weight() > threshold; });
 
-        case 5:
-        {
-            size_t index = static_cast<size_t>(read_int("Введите индекс заказа для удаления: "));
-            orders_demo.remove_item_by_index(index);
-            break;
-        }
+    if (found != nullptr)
+        cout << "Найден заказ: " << *found << endl;
+    else
+        cout << "Заказ тяжелее " << threshold << " кг не найден." << endl;
+}
 
-        case 6:
-        {
-            size_t index = static_cast<size_t>(read_int("Введите индекс машины для удаления: "));
-            cars_demo.remove_item_by_index(index);
-            break;
-        }
+static void handle_find_spacious_car(const Collection<Car>& cars_demo)
+{
+    const Car* found = find_if_matching(cars_demo,
+        [](const Car& car) { return car.is_trunk_spacious(); });
 
-        case 7:
-        {
-            double threshold = read_double("Введите пороговый вес (кг): ");
-            const Order* found = find_if_matching(orders_demo,
-                [threshold](const Order& order) { return order.get_weight() > threshold; });
+    if (found != nullptr)
+        cout << "Найдена машина с вместительным багажником: " << found->get_full_info() << endl;
+    else
+        cout << "Машин с вместительным багажником не найдено." << endl;
+}
 
-            if (found != nullptr)
-                cout << "Найден заказ: " << *found << endl;
-            else
-                cout << "Заказ тяжелее " << threshold << " кг не найден." << endl;
-            break;
-        }
+static void handle_find_order_by_id(const Collection<Order>& orders_demo)
+{
+    int id = read_int("Введите ID заказа для поиска: ");
+    Order candidate(id, "", Order().get_weight(), "");
 
-        case 8:
-        {
-            const Car* found = find_if_matching(cars_demo,
-                [](const Car& car) { return car.is_trunk_spacious(); });
+    int index = orders_demo.find_index(candidate);
+    if (index != -1)
+        cout << "Заказ с ID " << id << " найден в коллекции на позиции " << index << "." << endl;
+    else
+        cout << "Заказ с ID " << id << " в коллекции не найден." << endl;
+}
 
-            if (found != nullptr)
-                cout << "Найдена машина с вместительным багажником: " << found->get_full_info() << endl;
-            else
-                cout << "Машин с вместительным багажником не найдено." << endl;
-            break;
-        }
+static void handle_find_car_by_id(const Collection<Car>& cars_demo)
+{
+    int id = read_int("Введите ID машины для поиска: ");
+    Car candidate(id, 1.0, "", true, 100.0);
 
-        case 9:
-        {
-            int id = read_int("Введите ID заказа для поиска: ");
-            Order candidate(id, "", Order().get_weight(), "");
+    int index = cars_demo.find_index(candidate);
+    if (index != -1)
+        cout << "Машина с ID " << id << " найдена в коллекции на позиции " << index << "." << endl;
+    else
+        cout << "Машина с ID " << id << " в коллекции не найдена." << endl;
+}
 
-            int index = orders_demo.find_index(candidate);
-            if (index != -1)
-                cout << "Заказ с ID " << id << " найден в коллекции на позиции " << index << "." << endl;
-            else
-                cout << "Заказ с ID " << id << " в коллекции не найден." << endl;
-            break;
-        }
+static void handle_clear_orders_demo(Collection<Order>& orders_demo)
+{
+    orders_demo.clear_collection();
+    cout << "Коллекция заказов очищена." << endl;
+}
 
-        case 10:
-        {
-            int id = read_int("Введите ID машины для поиска: ");
-            Car candidate(id, 1.0, "", true, 100.0);
-
-            int index = cars_demo.find_index(candidate);
-            if (index != -1)
-                cout << "Машина с ID " << id << " найдена в коллекции на позиции " << index << "." << endl;
-            else
-                cout << "Машина с ID " << id << " в коллекции не найдена." << endl;
-            break;
-        }
-
-        case 11:
-            orders_demo.clear_collection();
-            cout << "Коллекция заказов очищена." << endl;
-            break;
-
-        case 12:
-            cars_demo.clear_collection();
-            cout << "Коллекция машин очищена." << endl;
-            break;
-
-        case 0:
-            running = false;
-            break;
-
-        default:
-            cout << "Ошибка: некорректный пункт меню!" << endl;
-            break;
-        }
-    }
+static void handle_clear_cars_demo(Collection<Car>& cars_demo)
+{
+    cars_demo.clear_collection();
+    cout << "Коллекция машин очищена." << endl;
 }
