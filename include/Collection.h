@@ -76,3 +76,14 @@ void Collection<T>::print_collection() const
         std::cout << items[i] << std::endl;
     }
 }
+
+template <typename T, typename Predicate>
+const T* find_if_matching(const Collection<T>& collection, Predicate predicate)
+{
+    for (size_t i = 0; i < collection.get_items_count(); i++)
+    {
+        const T& item = collection.get_item_by_index(i);
+        if (predicate(item)) return &item;
+    }
+    return nullptr;
+}

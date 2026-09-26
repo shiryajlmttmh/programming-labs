@@ -4,6 +4,8 @@
 #include "Motorcycle.h"
 #include "Car.h"
 #include "Truck.h"
+#include "CollectionDemo.h"
+
 #include <iostream>
 #include <windows.h>
 #include <string>
@@ -74,6 +76,7 @@ void run_delivery_app()
         case 11: handle_complete_delivery(delivery_service); break;
         case 12: handle_all_specific_actions(delivery_service); break;
         case 13: handle_delivery_costs(delivery_service); break;
+        case 14: run_collection_demo_menu(); break;
         case 0: cout << "Завершение работы." << endl; break;
         default: cout << "Неверный пункт меню!" << endl;
         }
@@ -114,6 +117,7 @@ static void print_menu()
         << "11. Завершить доставку по ID транспорта\n"
         << "12. Выполнить специфическое действие для всего транспорта\n"
         << "13. Рассчитать стоимость доставки для всего транспорта\n"
+        << "14. Демонстрация шаблонного контейнера (Collection<T>)\n"
         << "0. Выход\n";
 }
 
