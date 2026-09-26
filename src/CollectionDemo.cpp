@@ -64,7 +64,7 @@ static void seed_collection_demo_data(Collection<Order>& orders_demo, Collection
 
     cars_demo.add_item(Car(1, 1200.0, "Иванов Иван", true, 250.0));
     cars_demo.add_item(Car(2, 1400.0, "Петров Пётр", true, 500.0));
-    cars_demo.add_item(Car(3, 900.0, "Сидоров Сидор", false, 150.0));
+    cars_demo.add_item(Car(3, 900.0, "Сидоров Сидор", true, 150.0));
 
     cout << "Демонстрационные данные загружены: "
         << orders_demo.get_items_count() << " заказ(ов), "
@@ -103,18 +103,23 @@ static void handle_print_cars(const Collection<Car>& cars_demo)
 
 static void handle_add_order_demo(Collection<Order>& orders_demo)
 {
-    int id = read_int("Введите ID заказа: ");
-    double weight = read_double("Введите вес (кг): ");
-    orders_demo.add_item(Order(id, "Демо-адрес", weight, "Демо-район"));
+    cout << "\n--- Добавление заказа ---" << endl;
+
+    Order order;
+    cin >> order;
+
+    orders_demo.add_item(order);
     cout << "Заказ добавлен в коллекцию." << endl;
 }
 
 static void handle_add_car_demo(Collection<Car>& cars_demo)
 {
-    int id = read_int("Введите ID машины: ");
-    double capacity = read_double("Введите грузоподъёмность (кг): ");
-    double trunk = read_double("Введите объём багажника (л): ");
-    cars_demo.add_item(Car(id, capacity, "Демо-курьер", true, trunk));
+    cout << "\n--- Добавление машины ---" << endl;
+
+    Car car;
+    cin >> car;
+
+    cars_demo.add_item(car);
     cout << "Машина добавлена в коллекцию." << endl;
 }
 
