@@ -163,9 +163,8 @@ static void handle_find_order_by_id(const Collection<Order>& orders_demo)
     int id = read_int("Введите ID заказа для поиска: ");
     Order candidate(id, "", Order().get_weight(), "");
 
-    int index = orders_demo.find_index(candidate);
-    if (index != -1)
-        cout << "Заказ с ID " << id << " найден в коллекции на позиции " << index << "." << endl;
+    if (orders_demo.contains(candidate))
+        cout << "Заказ с ID " << id << " найден в коллекции." << endl;
     else
         cout << "Заказ с ID " << id << " в коллекции не найден." << endl;
 }
@@ -175,9 +174,8 @@ static void handle_find_car_by_id(const Collection<Car>& cars_demo)
     int id = read_int("Введите ID машины для поиска: ");
     Car candidate(id, 1.0, "", true, 100.0);
 
-    int index = cars_demo.find_index(candidate);
-    if (index != -1)
-        cout << "Машина с ID " << id << " найдена в коллекции на позиции " << index << "." << endl;
+    if (cars_demo.contains(candidate))
+        cout << "Машина с ID " << id << " найдена в коллекции." << endl;
     else
         cout << "Машина с ID " << id << " в коллекции не найдена." << endl;
 }
