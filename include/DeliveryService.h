@@ -22,11 +22,14 @@ public:
     void perform_all_specific_actions();
     void print_delivery_costs(double order_weight) const;
 
-    bool add_vehicle(std::unique_ptr<Vehicle> vehicle);
-    bool add_order(const Order& order);
-    bool assign_order_to_vehicle(int order_id);
-    bool remove_order_by_id(int order_id);
-    bool complete_delivery(int vehicle_id);
+    void add_vehicle(std::unique_ptr<Vehicle> vehicle);
+    void add_order(const Order& order);
+    void assign_order_to_vehicle(int order_id);
+    void remove_order_by_id(int order_id);
+    void complete_delivery(int vehicle_id);
+
+    void change_vehicle_id(int old_id, int new_id);
+    void change_order_id(int old_id, int new_id);
 
     Vehicle* get_vehicle(int id);
     Order* get_order(int id);

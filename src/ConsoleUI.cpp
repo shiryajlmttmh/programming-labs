@@ -205,8 +205,8 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
     }
     }
 
-    if (delivery_service.add_vehicle(move(vehicle)))
-        cout << "Транспорт успешно добавлен." << endl;
+    delivery_service.add_vehicle(move(vehicle));
+    cout << "Транспорт успешно добавлен." << endl;
 }
 
 static void handle_add_order(DeliveryService& delivery_service)
@@ -242,19 +242,9 @@ static void handle_compare_orders(DeliveryService& delivery_service)
 
     int first_order_id = read_int("\nВведите ID первого заказа: ");
     Order* first_order = delivery_service.get_order(first_order_id);
-    if (!first_order)
-    {
-        cout << "Ошибка: заказ с ID " << first_order_id << " не найден!" << endl;
-        return;
-    }
 
     int second_order_id = read_int("Введите ID второго заказа: ");
     Order* second_order = delivery_service.get_order(second_order_id);
-    if (!second_order)
-    {
-        cout << "Ошибка: заказ с ID " << second_order_id << " не найден!" << endl;
-        return;
-    }
 
     cout << "\n--- Выберите оператор сравнения для заказов ---" << endl;
     cout << "1. == (Равенство по ID)\n"
@@ -297,19 +287,9 @@ static void handle_compare_vehicles(DeliveryService& delivery_service)
 
     int first_vehicle_id = read_int("\nВведите ID первого транспорта: ");
     Vehicle* first_vehicle = delivery_service.get_vehicle(first_vehicle_id);
-    if (!first_vehicle)
-    {
-        cout << "Ошибка: транспорт с ID " << first_vehicle_id << " не найден!" << endl;
-        return;
-    }
 
     int second_vehicle_id = read_int("Введите ID второго транспорта: ");
     Vehicle* second_vehicle = delivery_service.get_vehicle(second_vehicle_id);
-    if (!second_vehicle)
-    {
-        cout << "Ошибка: транспорт с ID " << second_vehicle_id << " не найден!" << endl;
-        return;
-    }
 
     cout << "\n--- Выберите оператор сравнения для транспорта ---" << endl;
     cout << "1. == (Равенство по ID)\n"
@@ -351,12 +331,6 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
     int vehicle_id = read_int("Введите ID транспорта для управления: ");
     Vehicle* vehicle = delivery_service.get_vehicle(vehicle_id);
 
-    if (!vehicle)
-    {
-        cout << "Ошибка: транспорт с таким ID не найден!" << endl;
-        return;
-    }
-
     int menu_choice = -1;
     while (menu_choice != 0)
     {
@@ -392,34 +366,17 @@ static void handle_specific_vehicle_action(Vehicle* vehicle)
 static void handle_vehicle_delivery_cost(Vehicle* vehicle)
 {
     double weight = read_double("Введите вес груза (кг): ");
-    if (weight <= 0)
-    {
-        cout << "Ошибка: вес должен быть положительным!" << endl;
-        return;
-    }
-
-    if (!vehicle->can_carry(weight))
-    {
-        cout << "Ошибка: груз (" << weight << " кг) превышает грузоподъемность транспорта ("
-            << vehicle->get_capacity() << " кг)!" << endl;
-        return;
-    }
+    double cost = vehicle->calculate_delivery_cost(weight);
 
     cout << "Стоимость доставки груза весом " << weight << " кг транспортом номер " << vehicle->get_id()
         << " (" << vehicle->get_type() << "): "
-        << format("{:.2f}", vehicle->calculate_delivery_cost(weight)) << " руб." << endl;
+        << format("{:.2f}", cost) << " руб." << endl;
 }
 
 static void handle_manage_order(DeliveryService& delivery_service)
 {
     int order_id = read_int("Введите ID заказа для управления: ");
     Order* order = delivery_service.get_order(order_id);
-
-    if (!order)
-    {
-        cout << "Ошибка: заказ с таким ID не найден!" << endl;
-        return;
-    }
 
     int menu_choice = -1;
     while (menu_choice != 0)
@@ -466,44 +423,21 @@ static void handle_all_specific_actions(DeliveryService& delivery_service)
 static void handle_delivery_costs(DeliveryService& delivery_service)
 {
     double weight = read_double("Введите вес груза (кг): ");
-    if (weight <= 0)
-    {
-        cout << "Ошибка: вес должен быть положительным!" << endl;
-        return;
-    }
     delivery_service.print_delivery_costs(weight);
 }
 
 static void handle_change_vehicle_id(DeliveryService& delivery_service, Vehicle* vehicle)
 {
-    if (vehicle->get_current_order_id() != -1)
-    {
-        cout << "Ошибка: нельзя менять ID транспорта во время доставки!" << endl;
-        return;
-    }
-
     int new_vehicle_id = read_int("Введите новый ID: ");
-    if (delivery_service.check_vehicle_exists(new_vehicle_id) && new_vehicle_id != vehicle->get_id())
-    {
-        cout << "Ошибка: транспорт с таким ID уже существует!" << endl;
-    }
-    else
-    {
-        vehicle->set_id(new_vehicle_id);
-        cout << "ID успешно изменен." << endl;
-    }
+    delivery_service.change_vehicle_id(vehicle->get_id(), new_vehicle_id);
+    cout << "ID успешно изменен." << endl;
 }
 
 static void handle_change_vehicle_capacity(Vehicle* vehicle)
 {
-    if (vehicle->get_current_order_id() != -1)
-    {
-        cout << "Ошибка: нельзя менять грузоподъемность во время доставки!" << endl;
-        return;
-    }
-
     double new_capacity = read_double("Введите новую грузоподъемность (кг): ");
     vehicle->set_capacity(new_capacity);
+    cout << "Грузоподъемность успешно изменена." << endl;
 }
 
 static void handle_change_vehicle_courier(Vehicle* vehicle)
@@ -516,12 +450,6 @@ static void handle_change_vehicle_courier(Vehicle* vehicle)
 
 static void handle_change_vehicle_status(Vehicle* vehicle)
 {
-    if (vehicle->get_current_order_id() != -1)
-    {
-        cout << "Ошибка: транспорт сейчас выполняет заказ! Изменение статуса заблокировано." << endl;
-        return;
-    }
-
     bool current_availability_status = vehicle->get_is_available();
     vehicle->set_is_available(!current_availability_status);
     cout << "Статус изменен. Теперь транспорт: " << (vehicle->get_is_available() ? "Свободен" : "Заблокирован") << endl;
@@ -529,22 +457,9 @@ static void handle_change_vehicle_status(Vehicle* vehicle)
 
 static void handle_change_order_id(DeliveryService& delivery_service, Order* order)
 {
-    if (order->get_is_assigned())
-    {
-        cout << "Ошибка: нельзя менять ID заказа, который уже доставляется!" << endl;
-        return;
-    }
-
     int new_order_id = read_int("Введите новый ID: ");
-    if (delivery_service.check_order_exists(new_order_id) && new_order_id != order->get_id())
-    {
-        cout << "Ошибка: заказ с таким ID уже существует!" << endl;
-    }
-    else
-    {
-        order->set_id(new_order_id);
-        cout << "ID успешно изменен." << endl;
-    }
+    delivery_service.change_order_id(order->get_id(), new_order_id);
+    cout << "ID успешно изменен." << endl;
 }
 
 static void handle_change_order_address(Order* order)
@@ -557,14 +472,9 @@ static void handle_change_order_address(Order* order)
 
 static void handle_change_order_weight(Order* order)
 {
-    if (order->get_is_assigned())
-    {
-        cout << "Ошибка: нельзя менять вес заказа, который уже назначен на транспорт!" << endl;
-        return;
-    }
-
     double new_weight = read_double("Введите новый вес (кг): ");
     order->set_weight(new_weight);
+    cout << "Вес успешно изменен." << endl;
 }
 
 static void handle_change_order_district(Order* order)

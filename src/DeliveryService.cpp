@@ -1,4 +1,5 @@
 #include "DeliveryService.h"
+#include "Exceptions.h"
 #include <iostream>
 #include <format>
 
@@ -24,6 +25,9 @@ void DeliveryService::perform_all_specific_actions()
 
 void DeliveryService::print_delivery_costs(double order_weight) const
 {
+    if (order_weight <= 0)
+        throw InvalidDataException("Вес груза должен быть положительным, получено: " + format("{:.1f}", order_weight));
+
     cout << "\n--- Стоимость доставки груза весом " << order_weight << " кг ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
 
@@ -45,48 +49,56 @@ void DeliveryService::print_all_orders() const
     orders.print_collection();
 }
 
-bool DeliveryService::add_vehicle(unique_ptr<Vehicle> vehicle)
+void DeliveryService::add_vehicle(unique_ptr<Vehicle> vehicle)
 {
-    if (!vehicle) return false;
+    if (!vehicle) throw InvalidDataException("Невозможно добавить транспорт: передан пустой указатель");
 
     if (find_vehicle_index_by_id(vehicle->get_id()) != -1)
-    {
-        cout << "Ошибка: транспорт с ID " << vehicle->get_id() << " уже существует!" << endl;
-        return false;
-    }
+        throw DuplicateIdException("Транспорт", vehicle->get_id());
+
     vehicles.push_back(move(vehicle));
-    return true;
 }
 
-bool DeliveryService::add_order(const Order& order)
+void DeliveryService::add_order(const Order& order)
 {
     if (find_order_index_by_id(order.get_id()) != -1)
-    {
-        cout << "Ошибка: заказ с ID " << order.get_id() << " уже существует!" << endl;
-        return false;
-    }
+        throw DuplicateIdException("Заказ", order.get_id());
+
     orders.add_item(order);
-    return true;
 }
 
-bool DeliveryService::remove_order_by_id(int order_id)
+void DeliveryService::remove_order_by_id(int order_id)
 {
     int index = find_order_index_by_id(order_id);
-    if (index == -1)
-    {
-        cout << "Ошибка: заказ с номером " << order_id << " не найден!" << endl;
-        return false;
-    }
+    if (index == -1) throw NotFoundException("Заказ", order_id);
 
     if (orders.get_item_by_index(static_cast<size_t>(index)).get_is_assigned())
-    {
-        cout << "Ошибка: нельзя удалить заказ номер " << order_id << ", так как он находится в процессе доставки!" << endl;
-        return false;
-    }
+        throw InvalidOperationException("Нельзя удалить заказ номер " + to_string(order_id) + ", так как он находится в процессе доставки");
 
     orders.remove_item_by_index(static_cast<size_t>(index));
     cout << "Заказ номер " << order_id << " успешно удален из системы." << endl;
-    return true;
+}
+
+void DeliveryService::change_vehicle_id(int old_id, int new_id)
+{
+    int index = find_vehicle_index_by_id(old_id);
+    if (index == -1) throw NotFoundException("Транспорт", old_id);
+
+    if (new_id != old_id && find_vehicle_index_by_id(new_id) != -1)
+        throw DuplicateIdException("Транспорт", new_id);
+
+    vehicles[index]->set_id(new_id);
+}
+
+void DeliveryService::change_order_id(int old_id, int new_id)
+{
+    int index = find_order_index_by_id(old_id);
+    if (index == -1) throw NotFoundException("Заказ", old_id);
+
+    if (new_id != old_id && find_order_index_by_id(new_id) != -1)
+        throw DuplicateIdException("Заказ", new_id);
+
+    orders.get_item_by_index(static_cast<size_t>(index)).set_id(new_id);
 }
 
 int DeliveryService::find_optimal_vehicle_index(double order_weight) const
@@ -126,77 +138,52 @@ int DeliveryService::find_order_index_by_id(int id) const
     return -1;
 }
 
-bool DeliveryService::assign_order_to_vehicle(int order_id)
+void DeliveryService::assign_order_to_vehicle(int order_id)
 {
     int order_index = find_order_index_by_id(order_id);
-    if (order_index == -1)
-    {
-        cout << "Ошибка: заказ с номером " << order_id << " не найден!" << endl;
-        return false;
-    }
+    if (order_index == -1) throw NotFoundException("Заказ", order_id);
 
     Order& order = orders.get_item_by_index(static_cast<size_t>(order_index));
 
     if (order.get_is_assigned())
-    {
-        cout << "Ошибка: заказ номер " << order_id << " уже назначен на транспорт!" << endl;
-        return false;
-    }
+        throw InvalidOperationException("Заказ номер " + to_string(order_id) + " уже назначен на транспорт");
 
     int vehicle_index = find_optimal_vehicle_index(order.get_weight());
     if (vehicle_index == -1)
-    {
-        cout << "Ошибка: нет свободного транспорта, способного увезти заказ номер " << order_id
-            << " (" << order.get_weight() << " кг)!" << endl;
-        return false;
-    }
+        throw ConstraintViolationException("Нет свободного транспорта, способного увезти заказ номер "
+            + to_string(order_id) + " (" + format("{:.1f}", order.get_weight()) + " кг)");
 
-    if (vehicles[vehicle_index]->assign_order(order))
-    {
-        order.set_is_assigned(true);
-        return true;
-    }
-
-    return false;
+    vehicles[vehicle_index]->assign_order(order);
+    order.set_is_assigned(true);
 }
 
-bool DeliveryService::complete_delivery(int vehicle_id)
+void DeliveryService::complete_delivery(int vehicle_id)
 {
     int vehicle_index = find_vehicle_index_by_id(vehicle_id);
-    if (vehicle_index == -1)
-    {
-        cout << "Ошибка: транспорт с номером " << vehicle_id << " не найден!" << endl;
-        return false;
-    }
+    if (vehicle_index == -1) throw NotFoundException("Транспорт", vehicle_id);
 
     int order_id = vehicles[vehicle_index]->get_current_order_id();
-    if (order_id == -1)
-    {
-        cout << "Ошибка: у транспорта номер " << vehicle_id << " нет активного заказа!" << endl;
-        return false;
-    }
-
     int order_index = find_order_index_by_id(order_id);
 
     vehicles[vehicle_index]->complete_delivery();
 
     if (order_index != -1) orders.remove_item_by_index(static_cast<size_t>(order_index));
-
-    return true;
 }
 
 Vehicle* DeliveryService::get_vehicle(int id)
 {
     int index = find_vehicle_index_by_id(id);
-    if (index != -1) return vehicles[index].get();
-    return nullptr;
+    if (index == -1) throw NotFoundException("Транспорт", id);
+
+    return vehicles[index].get();
 }
 
 Order* DeliveryService::get_order(int id)
 {
     int index = find_order_index_by_id(id);
-    if (index != -1) return &orders.get_item_by_index(static_cast<size_t>(index));
-    return nullptr;
+    if (index == -1) throw NotFoundException("Заказ", id);
+
+    return &orders.get_item_by_index(static_cast<size_t>(index));
 }
 
 bool DeliveryService::check_vehicle_exists(int id) const { return find_vehicle_index_by_id(id) != -1; }

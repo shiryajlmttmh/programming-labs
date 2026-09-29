@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 template <typename T>
 class Collection
@@ -34,10 +35,8 @@ template <typename T>
 void Collection<T>::remove_item_by_index(size_t index)
 {
     if (index >= items.size())
-    {
-        std::cout << "Ошибка: индекс " << index << " выходит за пределы коллекции!" << std::endl;
-        return;
-    }
+        throw std::out_of_range("Индекс " + std::to_string(index) + " выходит за пределы коллекции (размер: "
+            + std::to_string(items.size()) + ")");
 
     items.erase(items.begin() + index);
 }
@@ -45,13 +44,21 @@ void Collection<T>::remove_item_by_index(size_t index)
 template <typename T>
 const T& Collection<T>::get_item_by_index(size_t index) const
 {
-    return items.at(index);
+    if (index >= items.size())
+        throw std::out_of_range("Индекс " + std::to_string(index) + " выходит за пределы коллекции (размер: "
+            + std::to_string(items.size()) + ")");
+
+    return items[index];
 }
 
 template <typename T>
 T& Collection<T>::get_item_by_index(size_t index)
 {
-    return items.at(index);
+    if (index >= items.size())
+        throw std::out_of_range("Индекс " + std::to_string(index) + " выходит за пределы коллекции (размер: "
+            + std::to_string(items.size()) + ")");
+
+    return items[index];
 }
 
 template <typename T>

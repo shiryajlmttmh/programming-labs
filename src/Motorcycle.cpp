@@ -1,5 +1,6 @@
 #include "Motorcycle.h"
 #include "InputUtils.h"
+#include "Exceptions.h"
 #include <iostream>
 
 using namespace std;
@@ -54,6 +55,8 @@ string Motorcycle::get_specific_action_name() const
 
 double Motorcycle::calculate_delivery_cost(double order_weight) const
 {
+    validate_cargo_weight(order_weight);
+
     double cost = BASE_COST + COST_PER_KG * order_weight;
     if (has_thermal_box) cost += THERMAL_BOX_SURCHARGE;
     return cost;
@@ -63,13 +66,9 @@ istream& operator>>(istream& is, Motorcycle& motorcycle)
 {
     is >> static_cast<Vehicle&>(motorcycle);
 
-    int choice;
-    while (true)
-    {
-        choice = read_int("Есть ли термокороб? (1 - Да, 0 - Нет): ");
-        if (choice == 0 || choice == 1) break;
-        cout << "Ошибка: введите 1 (Да) или 0 (Нет)!" << endl;
-    }
+    int choice = read_int("Есть ли термокороб? (1 - Да, 0 - Нет): ");
+    if (choice != 0 && choice != 1)
+        throw InvalidDataException("Наличие термокороба задаётся числом 1 (Да) или 0 (Нет), получено: " + to_string(choice));
 
     motorcycle.has_thermal_box = (choice == 1);
     return is;

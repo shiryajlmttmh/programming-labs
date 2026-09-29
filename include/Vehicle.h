@@ -17,11 +17,12 @@ protected:
     Vehicle(int id, double capacity, const std::string& courier_name, bool is_available = true);
 
     static double validate_capacity(double capacity, double max_capacity, const std::string& type_name);
+    void validate_cargo_weight(double cargo_weight) const;
 
 public:
     virtual ~Vehicle() = default;
 
-    bool assign_order(const Order& order);
+    void assign_order(const Order& order);
     void complete_delivery();
 
     bool can_carry(double cargo_weight) const;

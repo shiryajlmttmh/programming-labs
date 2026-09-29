@@ -1,5 +1,6 @@
 #include "Order.h"
 #include "InputUtils.h"
+#include "Exceptions.h"
 #include <iostream>
 #include <format>
 
@@ -15,12 +16,10 @@ Order::Order(int id, const string& address, double weight, const string& distric
     this->is_assigned = false;
 
     if (weight < MIN_WEIGHT || weight > MAX_WEIGHT)
-    {
-        cout << "Предупреждение: Некорректный вес заказа (" << weight
-            << " кг). Установлен вес по умолчанию: " << MIN_WEIGHT << " кг." << endl;
-        this->weight = MIN_WEIGHT;
-    }
-    else this->weight = weight;
+        throw InvalidDataException("Вес заказа должен быть от " + format("{:.1f}", MIN_WEIGHT)
+            + " до " + format("{:.1f}", MAX_WEIGHT) + " кг, получено: " + format("{:.1f}", weight));
+
+    this->weight = weight;
 }
 
 int Order::get_id() const { return id; }
@@ -29,17 +28,26 @@ double Order::get_weight() const { return weight; }
 string Order::get_district() const { return district; }
 bool Order::get_is_assigned() const { return is_assigned; }
 
-void Order::set_id(int new_id) { id = new_id; }
+void Order::set_id(int new_id)
+{
+    if (is_assigned)
+        throw InvalidOperationException("Нельзя менять номер заказа " + to_string(id) + ", он уже доставляется");
+
+    id = new_id;
+}
+
 void Order::set_address(const string& new_address) { address = new_address; }
 
 void Order::set_weight(double new_weight)
 {
+    if (is_assigned)
+        throw InvalidOperationException("Нельзя менять вес заказа " + to_string(id) + ", он уже назначен на транспорт");
+
     if (new_weight < MIN_WEIGHT || new_weight > MAX_WEIGHT)
-    {
-        cout << "Ошибка: Вес заказа должен быть от " << MIN_WEIGHT
-            << " до " << MAX_WEIGHT << " кг!" << endl;
-    }
-    else weight = new_weight;
+        throw InvalidDataException("Вес заказа должен быть от " + format("{:.1f}", MIN_WEIGHT)
+            + " до " + format("{:.1f}", MAX_WEIGHT) + " кг, получено: " + format("{:.1f}", new_weight));
+
+    weight = new_weight;
 }
 
 void Order::set_district(const string& new_district) { district = new_district; }
@@ -78,18 +86,10 @@ istream& operator>>(istream& is, Order& order)
     cout << "Введите адрес: ";
     getline(is, order.address);
 
-    while (true)
-    {
-        double input_weight = read_double("Введите вес (кг): ");
-        if (input_weight >= Order::MIN_WEIGHT && input_weight <= Order::MAX_WEIGHT)
-        {
-            order.weight = input_weight;
-            break;
-        }
-
-        cout << "Ошибка: Вес заказа должен быть от " << Order::MIN_WEIGHT
-            << " до " << Order::MAX_WEIGHT << " кг! Попробуйте снова." << endl;
-    }
+    double input_weight = read_double("Введите вес (кг): ");
+    if (input_weight >= Order::MIN_WEIGHT && input_weight <= Order::MAX_WEIGHT) order.weight = input_weight;
+    else throw InvalidDataException("Вес заказа должен быть от " + format("{:.1f}", Order::MIN_WEIGHT)
+        + " до " + format("{:.1f}", Order::MAX_WEIGHT) + " кг, получено: " + format("{:.1f}", input_weight));
 
     cout << "Введите район: ";
     getline(is, order.district);
