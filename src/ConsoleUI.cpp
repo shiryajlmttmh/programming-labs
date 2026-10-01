@@ -13,11 +13,12 @@
 #include <memory>
 #include <format>
 #include <stdexcept>
+#include <exception>
 
 using namespace std;
 
 static void setup_console_encoding();
-static void report_current_exception();
+static void report_exception(exception_ptr ep);
 static void seed_data(DeliveryService& delivery_service);
 static void print_menu();
 static void print_manage_vehicle_menu(Vehicle* vehicle);
@@ -64,7 +65,7 @@ void run_delivery_app()
     catch (...)
     {
         cout << "Не удалось полностью загрузить тестовые данные." << endl;
-        report_current_exception();
+        report_exception(current_exception());
     }
 
     int menu_choice = -1;
@@ -97,16 +98,16 @@ void run_delivery_app()
         }
         catch (...)
         {
-            report_current_exception();
+            report_exception(current_exception());
         }
     }
 }
 
-static void report_current_exception()
+static void report_exception(exception_ptr ep)
 {
     try
     {
-        throw;
+        if (ep) rethrow_exception(ep);
     }
     catch (const NotFoundException& e)
     {
@@ -423,7 +424,7 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
         }
         catch (...)
         {
-            report_current_exception();
+            report_exception(current_exception());
         }
     }
 }
@@ -475,7 +476,7 @@ static void handle_manage_order(DeliveryService& delivery_service)
         }
         catch (...)
         {
-            report_current_exception();
+            report_exception(current_exception());
         }
     }
 }
