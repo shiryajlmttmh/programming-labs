@@ -3,7 +3,9 @@
 #include "Order.h"
 #include "Car.h"
 #include "InputUtils.h"
+#include "Exceptions.h"
 #include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -28,7 +30,14 @@ void run_collection_demo_menu()
     Collection<Order> orders_demo;
     Collection<Car> cars_demo;
 
-    seed_collection_demo_data(orders_demo, cars_demo);
+    try
+    {
+        seed_collection_demo_data(orders_demo, cars_demo);
+    }
+    catch (const exception& e)
+    {
+        cout << "Не удалось полностью загрузить демонстрационные данные: " << e.what() << "." << endl;
+    }
 
     int menu_choice = -1;
     while (menu_choice != 0)
@@ -36,22 +45,37 @@ void run_collection_demo_menu()
         print_demo_menu();
         menu_choice = read_int("Выберите действие: ");
 
-        switch (menu_choice)
+        try
         {
-        case 1:  handle_print_orders(orders_demo); break;
-        case 2:  handle_print_cars(cars_demo); break;
-        case 3:  handle_add_order_demo(orders_demo); break;
-        case 4:  handle_add_car_demo(cars_demo); break;
-        case 5:  handle_remove_order_demo(orders_demo); break;
-        case 6:  handle_remove_car_demo(cars_demo); break;
-        case 7:  handle_find_heavy_order(orders_demo); break;
-        case 8:  handle_find_spacious_car(cars_demo); break;
-        case 9:  handle_find_order_by_id(orders_demo); break;
-        case 10: handle_find_car_by_id(cars_demo); break;
-        case 11: handle_clear_orders_demo(orders_demo); break;
-        case 12: handle_clear_cars_demo(cars_demo); break;
-        case 0:  break;
-        default: cout << "Ошибка: некорректный пункт меню!" << endl;
+            switch (menu_choice)
+            {
+            case 1:  handle_print_orders(orders_demo); break;
+            case 2:  handle_print_cars(cars_demo); break;
+            case 3:  handle_add_order_demo(orders_demo); break;
+            case 4:  handle_add_car_demo(cars_demo); break;
+            case 5:  handle_remove_order_demo(orders_demo); break;
+            case 6:  handle_remove_car_demo(cars_demo); break;
+            case 7:  handle_find_heavy_order(orders_demo); break;
+            case 8:  handle_find_spacious_car(cars_demo); break;
+            case 9:  handle_find_order_by_id(orders_demo); break;
+            case 10: handle_find_car_by_id(cars_demo); break;
+            case 11: handle_clear_orders_demo(orders_demo); break;
+            case 12: handle_clear_cars_demo(cars_demo); break;
+            case 0:  break;
+            default: cout << "Ошибка: некорректный пункт меню!" << endl;
+            }
+        }
+        catch (const InvalidDataException& e)
+        {
+            cout << "Некорректные данные: " << e.what() << "." << endl;
+        }
+        catch (const out_of_range& e)
+        {
+            cout << "Выход за пределы коллекции: " << e.what() << "." << endl;
+        }
+        catch (const exception& e)
+        {
+            cout << "Непредвиденная ошибка: " << e.what() << "." << endl;
         }
     }
 }

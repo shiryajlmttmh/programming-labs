@@ -5,16 +5,19 @@
 #include "Car.h"
 #include "Truck.h"
 #include "CollectionDemo.h"
+#include "Exceptions.h"
 
 #include <iostream>
 #include <windows.h>
 #include <string>
 #include <memory>
 #include <format>
+#include <stdexcept>
 
 using namespace std;
 
 static void setup_console_encoding();
+static void report_current_exception();
 static void seed_data(DeliveryService& delivery_service);
 static void print_menu();
 static void print_manage_vehicle_menu(Vehicle* vehicle);
@@ -53,7 +56,16 @@ void run_delivery_app()
     setup_console_encoding();
 
     DeliveryService delivery_service;
-    seed_data(delivery_service);
+
+    try
+    {
+        seed_data(delivery_service);
+    }
+    catch (...)
+    {
+        cout << "Не удалось полностью загрузить тестовые данные." << endl;
+        report_current_exception();
+    }
 
     int menu_choice = -1;
     while (menu_choice != 0)
@@ -61,25 +73,76 @@ void run_delivery_app()
         print_menu();
         menu_choice = read_int("Выберите действие: ");
 
-        switch (menu_choice)
+        try
         {
-        case 1: handle_add_vehicle(delivery_service); break;
-        case 2: handle_add_order(delivery_service); break;
-        case 3: handle_remove_order(delivery_service); break;
-        case 4: handle_compare_orders(delivery_service); break;
-        case 5: handle_compare_vehicles(delivery_service); break;
-        case 6: handle_manage_vehicle(delivery_service); break;
-        case 7: handle_manage_order(delivery_service); break;
-        case 8: delivery_service.print_all_vehicles(); break;
-        case 9: delivery_service.print_all_orders(); break;
-        case 10: handle_assign_order(delivery_service); break;
-        case 11: handle_complete_delivery(delivery_service); break;
-        case 12: handle_all_specific_actions(delivery_service); break;
-        case 13: handle_delivery_costs(delivery_service); break;
-        case 14: run_collection_demo_menu(); break;
-        case 0: cout << "Завершение работы." << endl; break;
-        default: cout << "Неверный пункт меню!" << endl;
+            switch (menu_choice)
+            {
+            case 1: handle_add_vehicle(delivery_service); break;
+            case 2: handle_add_order(delivery_service); break;
+            case 3: handle_remove_order(delivery_service); break;
+            case 4: handle_compare_orders(delivery_service); break;
+            case 5: handle_compare_vehicles(delivery_service); break;
+            case 6: handle_manage_vehicle(delivery_service); break;
+            case 7: handle_manage_order(delivery_service); break;
+            case 8: delivery_service.print_all_vehicles(); break;
+            case 9: delivery_service.print_all_orders(); break;
+            case 10: handle_assign_order(delivery_service); break;
+            case 11: handle_complete_delivery(delivery_service); break;
+            case 12: handle_all_specific_actions(delivery_service); break;
+            case 13: handle_delivery_costs(delivery_service); break;
+            case 14: run_collection_demo_menu(); break;
+            case 0: cout << "Завершение работы." << endl; break;
+            default: cout << "Неверный пункт меню!" << endl;
+            }
         }
+        catch (...)
+        {
+            report_current_exception();
+        }
+    }
+}
+
+static void report_current_exception()
+{
+    try
+    {
+        throw;
+    }
+    catch (const NotFoundException& e)
+    {
+        cout << "Ошибка поиска: " << e.what() << ". Проверьте номер (" << e.get_id() << ")." << endl;
+    }
+    catch (const DuplicateIdException& e)
+    {
+        cout << "Ошибка уникальности: " << e.what() << ". Выберите другой номер." << endl;
+    }
+    catch (const InvalidDataException& e)
+    {
+        cout << "Некорректные данные: " << e.what() << "." << endl;
+    }
+    catch (const ConstraintViolationException& e)
+    {
+        cout << "Нарушено ограничение: " << e.what() << "." << endl;
+    }
+    catch (const InvalidOperationException& e)
+    {
+        cout << "Недопустимая операция: " << e.what() << "." << endl;
+    }
+    catch (const DeliveryException& e)
+    {
+        cout << "Ошибка службы доставки: " << e.what() << "." << endl;
+    }
+    catch (const out_of_range& e)
+    {
+        cout << "Выход за пределы допустимого диапазона: " << e.what() << "." << endl;
+    }
+    catch (const exception& e)
+    {
+        cout << "Непредвиденная ошибка: " << e.what() << "." << endl;
+    }
+    catch (...)
+    {
+        cout << "Неизвестная ошибка." << endl;
     }
 }
 
@@ -337,23 +400,30 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
         print_manage_vehicle_menu(vehicle);
         menu_choice = read_int("Выберите действие: ");
 
-        switch (menu_choice)
+        try
         {
-        case 1: cout << *vehicle << endl; break;
-        case 2: cout << "ID транспорта: " << vehicle->get_id() << endl; break;
-        case 3: cout << "Тип транспорта: " << vehicle->get_type() << endl; break;
-        case 4: cout << "Грузоподъемность: " << vehicle->get_capacity() << " кг" << endl; break;
-        case 5: cout << "Имя курьера: " << vehicle->get_courier_name() << endl; break;
-        case 6: cout << "Статус доступности: " << (vehicle->get_is_available() ? "Свободен" : "Недоступен / Занят") << endl; break;
+            switch (menu_choice)
+            {
+            case 1: cout << *vehicle << endl; break;
+            case 2: cout << "ID транспорта: " << vehicle->get_id() << endl; break;
+            case 3: cout << "Тип транспорта: " << vehicle->get_type() << endl; break;
+            case 4: cout << "Грузоподъемность: " << vehicle->get_capacity() << " кг" << endl; break;
+            case 5: cout << "Имя курьера: " << vehicle->get_courier_name() << endl; break;
+            case 6: cout << "Статус доступности: " << (vehicle->get_is_available() ? "Свободен" : "Недоступен / Занят") << endl; break;
 
-        case 7:  handle_change_vehicle_id(delivery_service, vehicle); break;
-        case 8:  handle_change_vehicle_capacity(vehicle); break;
-        case 9:  handle_change_vehicle_courier(vehicle); break;
-        case 10: handle_change_vehicle_status(vehicle); break;
-        case 11: handle_specific_vehicle_action(vehicle); break;
-        case 12: handle_vehicle_delivery_cost(vehicle); break;
-        case 0:  break;
-        default: cout << "Неверный пункт меню!" << endl;
+            case 7:  handle_change_vehicle_id(delivery_service, vehicle); break;
+            case 8:  handle_change_vehicle_capacity(vehicle); break;
+            case 9:  handle_change_vehicle_courier(vehicle); break;
+            case 10: handle_change_vehicle_status(vehicle); break;
+            case 11: handle_specific_vehicle_action(vehicle); break;
+            case 12: handle_vehicle_delivery_cost(vehicle); break;
+            case 0:  break;
+            default: cout << "Неверный пункт меню!" << endl;
+            }
+        }
+        catch (...)
+        {
+            report_current_exception();
         }
     }
 }
@@ -384,21 +454,28 @@ static void handle_manage_order(DeliveryService& delivery_service)
         print_manage_order_menu(order->get_id());
         menu_choice = read_int("Выберите действие: ");
 
-        switch (menu_choice)
+        try
         {
-        case 1: cout << *order << endl; break;
-        case 2: cout << "ID заказа: " << order->get_id() << endl; break;
-        case 3: cout << "Адрес: " << order->get_address() << endl; break;
-        case 4: cout << "Вес: " << order->get_weight() << " кг" << endl; break;
-        case 5: cout << "Район: " << order->get_district() << endl; break;
-        case 6: cout << "Статус: " << (order->get_is_assigned() ? "Доставляется" : "Ожидает назначения") << endl; break;
+            switch (menu_choice)
+            {
+            case 1: cout << *order << endl; break;
+            case 2: cout << "ID заказа: " << order->get_id() << endl; break;
+            case 3: cout << "Адрес: " << order->get_address() << endl; break;
+            case 4: cout << "Вес: " << order->get_weight() << " кг" << endl; break;
+            case 5: cout << "Район: " << order->get_district() << endl; break;
+            case 6: cout << "Статус: " << (order->get_is_assigned() ? "Доставляется" : "Ожидает назначения") << endl; break;
 
-        case 7:  handle_change_order_id(delivery_service, order); break;
-        case 8:  handle_change_order_address(order); break;
-        case 9:  handle_change_order_weight(order); break;
-        case 10: handle_change_order_district(order); break;
-        case 0:  break;
-        default: cout << "Неверный пункт меню!" << endl;
+            case 7:  handle_change_order_id(delivery_service, order); break;
+            case 8:  handle_change_order_address(order); break;
+            case 9:  handle_change_order_weight(order); break;
+            case 10: handle_change_order_district(order); break;
+            case 0:  break;
+            default: cout << "Неверный пункт меню!" << endl;
+            }
+        }
+        catch (...)
+        {
+            report_current_exception();
         }
     }
 }
