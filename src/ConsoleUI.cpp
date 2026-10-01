@@ -129,6 +129,14 @@ static void report_exception(exception_ptr ep)
     {
         cout << "Недопустимая операция: " << e.what() << "." << endl;
     }
+    catch (const FileOpenException& e)
+    {
+        cout << "Ошибка файла: " << e.what() << ". Проверьте путь и права доступа." << endl;
+    }
+    catch (const FileFormatException& e)
+    {
+        cout << "Повреждённый файл данных: " << e.what() << "." << endl;
+    }
     catch (const DeliveryException& e)
     {
         cout << "Ошибка службы доставки: " << e.what() << "." << endl;

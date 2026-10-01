@@ -43,3 +43,21 @@ class InvalidOperationException : public DeliveryException
 public:
     explicit InvalidOperationException(const std::string& msg) : DeliveryException(msg) {}
 };
+
+class FileOpenException : public DeliveryException
+{
+    std::string filename;
+public:
+    FileOpenException(const std::string& filename, const std::string& purpose)
+        : DeliveryException("Не удалось открыть файл \"" + filename + "\" для " + purpose), filename(filename) {}
+    const std::string& get_filename() const { return filename; }
+};
+
+class FileFormatException : public DeliveryException
+{
+    int line;
+public:
+    FileFormatException(int line, const std::string& msg)
+        : DeliveryException("Ошибка формата данных в строке " + std::to_string(line) + ": " + msg), line(line) {}
+    int get_line() const { return line; }
+};
