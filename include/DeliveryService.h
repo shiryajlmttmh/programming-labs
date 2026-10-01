@@ -36,6 +36,11 @@ public:
     bool check_vehicle_exists(int id) const;
     bool check_order_exists(int id) const;
 
+    size_t get_vehicles_count() const;
+    const Vehicle& get_vehicle_by_index(size_t index) const;
+    size_t get_orders_count() const;
+    const Order& get_order_by_index(size_t index) const;
+
     DeliveryService& operator+=(const Order& order);
     DeliveryService& operator+=(std::unique_ptr<Vehicle> vehicle);
     DeliveryService& operator-=(int order_id);

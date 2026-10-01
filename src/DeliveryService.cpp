@@ -189,6 +189,24 @@ Order* DeliveryService::get_order(int id)
 bool DeliveryService::check_vehicle_exists(int id) const { return find_vehicle_index_by_id(id) != -1; }
 bool DeliveryService::check_order_exists(int id) const { return find_order_index_by_id(id) != -1; }
 
+size_t DeliveryService::get_vehicles_count() const { return vehicles.size(); }
+
+const Vehicle& DeliveryService::get_vehicle_by_index(size_t index) const
+{
+    if (index >= vehicles.size())
+        throw out_of_range("Индекс транспорта " + to_string(index) + " выходит за пределы списка (размер: "
+            + to_string(vehicles.size()) + ")");
+
+    return *vehicles[index];
+}
+
+size_t DeliveryService::get_orders_count() const { return orders.get_items_count(); }
+
+const Order& DeliveryService::get_order_by_index(size_t index) const
+{
+    return orders.get_item_by_index(index);
+}
+
 DeliveryService& DeliveryService::operator+=(const Order& order) { this->add_order(order); return *this; }
 DeliveryService& DeliveryService::operator+=(unique_ptr<Vehicle> vehicle) { this->add_vehicle(move(vehicle)); return *this; }
 DeliveryService& DeliveryService::operator-=(int order_id) { this->remove_order_by_id(order_id); return *this; }
