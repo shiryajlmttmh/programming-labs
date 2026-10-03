@@ -26,6 +26,11 @@ static constexpr const char* MOTORCYCLE_CODE = "MOTORCYCLE";
 static constexpr const char* TRUCK_CODE = "TRUCK";
 static constexpr int NO_ORDER_ID = -1;
 
+static constexpr size_t HEADER_FIELD_COUNT = 2;
+static constexpr size_t SECTION_HEADER_FIELD_COUNT = 2;
+static constexpr size_t VEHICLE_FIELD_COUNT = 7;
+static constexpr size_t ORDER_FIELD_COUNT = 5;
+
 struct VehicleLink
 {
     int vehicle_id;
@@ -262,7 +267,7 @@ static void read_file_header(istream& file, const string& filename, int& line_nu
         throw FileFormatException(line_number, "файл не является сохранением службы доставки (ожидался заголовок \""
             + string(FORMAT_HEADER) + "\")");
 
-    require_field_count(fields, 2, line_number);
+    require_field_count(fields, HEADER_FIELD_COUNT, line_number);
 
     int version = parse_int(fields[1], line_number, "версия формата");
     if (version != FORMAT_VERSION)
@@ -278,7 +283,7 @@ static int read_section_header(istream& file, const string& filename, int& line_
     if (fields[0] != section_name)
         throw FileFormatException(line_number, "ожидалась секция \"" + section_name + "\", получено: \"" + line + "\"");
 
-    require_field_count(fields, 2, line_number);
+    require_field_count(fields, SECTION_HEADER_FIELD_COUNT, line_number);
 
     int count = parse_int(fields[1], line_number, "количество записей");
     if (count < 0)
@@ -293,7 +298,7 @@ static unique_ptr<Vehicle> parse_vehicle(const vector<string>& fields, int line_
     if (type_code != CAR_CODE && type_code != MOTORCYCLE_CODE && type_code != TRUCK_CODE)
         throw FileFormatException(line_number, "неизвестный тип транспорта: \"" + type_code + "\"");
 
-    require_field_count(fields, 7, line_number);
+    require_field_count(fields, VEHICLE_FIELD_COUNT, line_number);
 
     int id = parse_int(fields[1], line_number, "ID транспорта");
     double capacity = parse_double(fields[2], line_number, "грузоподъемность");
@@ -321,7 +326,7 @@ static unique_ptr<Vehicle> parse_vehicle(const vector<string>& fields, int line_
 
 static Order parse_order(const vector<string>& fields, int line_number, OrderFlag& flag)
 {
-    require_field_count(fields, 5, line_number);
+    require_field_count(fields, ORDER_FIELD_COUNT, line_number);
 
     int id = parse_int(fields[0], line_number, "ID заказа");
     double weight = parse_double(fields[2], line_number, "вес");
