@@ -63,6 +63,21 @@ void Vehicle::assign_order(const Order& order)
         << " по адресу: " << order.get_address() << endl;
 }
 
+void Vehicle::restore_assignment(const Order& order)
+{
+    if (current_order_id != -1)
+        throw InvalidOperationException("Транспорт номер " + to_string(id) + " уже выполняет заказ номер "
+            + to_string(current_order_id));
+
+    if (!can_carry(order.get_weight()))
+        throw ConstraintViolationException("Вес заказа номер " + to_string(order.get_id()) + " ("
+            + format("{:.1f}", order.get_weight()) + " кг) превышает грузоподъемность транспорта номер "
+            + to_string(id) + " (" + format("{:.1f}", capacity) + " кг)");
+
+    is_available = false;
+    current_order_id = order.get_id();
+}
+
 void Vehicle::complete_delivery()
 {
     if (is_available || current_order_id == -1)

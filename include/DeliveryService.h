@@ -25,6 +25,7 @@ public:
     void add_vehicle(std::unique_ptr<Vehicle> vehicle);
     void add_order(const Order& order);
     void assign_order_to_vehicle(int order_id);
+    void restore_assignment(int vehicle_id, int order_id);
     void remove_order_by_id(int order_id);
     void complete_delivery(int vehicle_id);
 

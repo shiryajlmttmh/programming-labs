@@ -157,6 +157,23 @@ void DeliveryService::assign_order_to_vehicle(int order_id)
     order.set_is_assigned(true);
 }
 
+void DeliveryService::restore_assignment(int vehicle_id, int order_id)
+{
+    int vehicle_index = find_vehicle_index_by_id(vehicle_id);
+    if (vehicle_index == -1) throw NotFoundException("Транспорт", vehicle_id);
+
+    int order_index = find_order_index_by_id(order_id);
+    if (order_index == -1) throw NotFoundException("Заказ", order_id);
+
+    Order& order = orders.get_item_by_index(static_cast<size_t>(order_index));
+
+    if (order.get_is_assigned())
+        throw InvalidOperationException("Заказ номер " + to_string(order_id) + " уже назначен на транспорт");
+
+    vehicles[vehicle_index]->restore_assignment(order);
+    order.set_is_assigned(true);
+}
+
 void DeliveryService::complete_delivery(int vehicle_id)
 {
     int vehicle_index = find_vehicle_index_by_id(vehicle_id);
