@@ -431,3 +431,8 @@ FodyWeavers.xsd
 labs.slnx
 labs.vcxproj
 labs.vcxproj.filters
+
+# Файлы, создаваемые программой при работе
+delivery_state.txt
+delivery_log.txt
+delivery_report.txt
