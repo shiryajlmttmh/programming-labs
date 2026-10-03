@@ -33,6 +33,16 @@ string Truck::get_type() const
     return "Грузовик";
 }
 
+string Truck::get_type_code() const
+{
+    return "TRUCK";
+}
+
+string Truck::get_specific_field() const
+{
+    return has_tail_lift ? "1" : "0";
+}
+
 double Truck::get_max_capacity() const
 {
     return MAX_CAPACITY;

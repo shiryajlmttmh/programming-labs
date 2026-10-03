@@ -27,6 +27,8 @@ public:
     std::string get_full_info() const override;
     void perform_specific_action() override;
     std::string get_specific_action_name() const override;
+    std::string get_type_code() const override;
+    std::string get_specific_field() const override;
     double calculate_delivery_cost(double order_weight) const override;
 
     friend std::istream& operator>>(std::istream& is, Motorcycle& motorcycle);

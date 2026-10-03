@@ -33,6 +33,16 @@ string Motorcycle::get_type() const
     return "Мотоцикл";
 }
 
+string Motorcycle::get_type_code() const
+{
+    return "MOTORCYCLE";
+}
+
+string Motorcycle::get_specific_field() const
+{
+    return has_thermal_box ? "1" : "0";
+}
+
 double Motorcycle::get_max_capacity() const
 {
     return MAX_CAPACITY;

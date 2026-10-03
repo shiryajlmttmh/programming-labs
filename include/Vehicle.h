@@ -23,6 +23,7 @@ public:
     virtual ~Vehicle() = default;
 
     void assign_order(const Order& order);
+    void restore_assignment(const Order& order);
     void complete_delivery();
 
     bool can_carry(double cargo_weight) const;
@@ -43,6 +44,8 @@ public:
     virtual std::string get_full_info() const;
     virtual void perform_specific_action() = 0;
     virtual std::string get_specific_action_name() const = 0;
+    virtual std::string get_type_code() const = 0;
+    virtual std::string get_specific_field() const = 0;
     virtual double calculate_delivery_cost(double order_weight) const = 0;
 
     bool operator==(const Vehicle& other) const;

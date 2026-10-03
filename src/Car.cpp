@@ -47,6 +47,16 @@ string Car::get_type() const
     return "Машина";
 }
 
+string Car::get_type_code() const
+{
+    return "CAR";
+}
+
+string Car::get_specific_field() const
+{
+    return format("{}", trunk_volume);
+}
+
 double Car::get_max_capacity() const
 {
     return MAX_CAPACITY;
