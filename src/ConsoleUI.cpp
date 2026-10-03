@@ -1,6 +1,9 @@
 #include "ConsoleUI.h"
 #include "InputUtils.h"
 #include "DeliveryService.h"
+#include "DataStorage.h"
+#include "Logger.h"
+#include "ReportWriter.h"
 #include "Motorcycle.h"
 #include "Car.h"
 #include "Truck.h"
@@ -14,11 +17,19 @@
 #include <format>
 #include <stdexcept>
 #include <exception>
+#include <filesystem>
 
 using namespace std;
 
+static constexpr const char* DATA_FILE_NAME = "delivery_state.txt";
+static constexpr const char* LOG_FILE_NAME = "delivery_log.txt";
+static constexpr const char* REPORT_FILE_NAME = "delivery_report.txt";
+
+static Logger logger(LOG_FILE_NAME);
+
 static void setup_console_encoding();
 static void report_exception(exception_ptr ep);
+static void log_exception(exception_ptr ep);
 static void seed_data(DeliveryService& delivery_service);
 static void print_menu();
 static void print_manage_vehicle_menu(Vehicle* vehicle);
@@ -35,6 +46,11 @@ static void handle_assign_order(DeliveryService& delivery_service);
 static void handle_complete_delivery(DeliveryService& delivery_service);
 static void handle_all_specific_actions(DeliveryService& delivery_service);
 static void handle_delivery_costs(DeliveryService& delivery_service);
+static void handle_save_state(const DeliveryService& delivery_service);
+static void handle_load_state(DeliveryService& delivery_service);
+static void handle_create_report(const DeliveryService& delivery_service);
+static bool initialize_state(DeliveryService& delivery_service);
+static void auto_save_state(const DeliveryService& delivery_service);
 
 static void handle_compare_orders(DeliveryService& delivery_service);
 static void handle_compare_vehicles(DeliveryService& delivery_service);
@@ -55,18 +71,10 @@ static void handle_change_order_district(Order* order);
 void run_delivery_app()
 {
     setup_console_encoding();
+    logger.log("START", "Программа запущена");
 
     DeliveryService delivery_service;
-
-    try
-    {
-        seed_data(delivery_service);
-    }
-    catch (...)
-    {
-        cout << "Не удалось полностью загрузить тестовые данные." << endl;
-        report_exception(current_exception());
-    }
+    bool auto_save_enabled = initialize_state(delivery_service);
 
     int menu_choice = -1;
     while (menu_choice != 0)
@@ -92,6 +100,9 @@ void run_delivery_app()
             case 12: handle_all_specific_actions(delivery_service); break;
             case 13: handle_delivery_costs(delivery_service); break;
             case 14: run_collection_demo_menu(); break;
+            case 15: handle_save_state(delivery_service); break;
+            case 16: handle_load_state(delivery_service); break;
+            case 17: handle_create_report(delivery_service); break;
             case 0: cout << "Завершение работы." << endl; break;
             default: cout << "Неверный пункт меню!" << endl;
             }
@@ -101,10 +112,15 @@ void run_delivery_app()
             report_exception(current_exception());
         }
     }
+
+    if (auto_save_enabled) auto_save_state(delivery_service);
+    logger.log("EXIT", "Программа завершена");
 }
 
 static void report_exception(exception_ptr ep)
 {
+    log_exception(ep);
+
     try
     {
         if (ep) rethrow_exception(ep);
@@ -133,6 +149,10 @@ static void report_exception(exception_ptr ep)
     {
         cout << "Ошибка файла: " << e.what() << ". Проверьте путь и права доступа." << endl;
     }
+    catch (const FileIOException& e)
+    {
+        cout << "Сбой при работе с файлом: " << e.what() << "." << endl;
+    }
     catch (const FileFormatException& e)
     {
         cout << "Повреждённый файл данных: " << e.what() << "." << endl;
@@ -152,6 +172,22 @@ static void report_exception(exception_ptr ep)
     catch (...)
     {
         cout << "Неизвестная ошибка." << endl;
+    }
+}
+
+static void log_exception(exception_ptr ep)
+{
+    try
+    {
+        if (ep) rethrow_exception(ep);
+    }
+    catch (const exception& e)
+    {
+        logger.log("ERROR", e.what());
+    }
+    catch (...)
+    {
+        logger.log("ERROR", "Неизвестная ошибка");
     }
 }
 
@@ -190,6 +226,9 @@ static void print_menu()
         << "12. Выполнить специфическое действие для всего транспорта\n"
         << "13. Рассчитать стоимость доставки для всего транспорта\n"
         << "14. Демонстрация шаблонного контейнера (Collection<T>)\n"
+        << "15. Сохранить состояние в файл\n"
+        << "16. Загрузить состояние из файла\n"
+        << "17. Сформировать текстовый отчёт\n"
         << "0. Выход\n";
 }
 
@@ -277,8 +316,10 @@ static void handle_add_vehicle(DeliveryService& delivery_service)
     }
     }
 
+    string vehicle_info = vehicle->get_full_info();
     delivery_service.add_vehicle(move(vehicle));
     cout << "Транспорт успешно добавлен." << endl;
+    logger.log("ADD_VEHICLE", vehicle_info);
 }
 
 static void handle_add_order(DeliveryService& delivery_service)
@@ -286,12 +327,14 @@ static void handle_add_order(DeliveryService& delivery_service)
     Order order;
     cin >> order;
     delivery_service += order;
+    logger.log("ADD_ORDER", order.get_full_info());
 }
 
 static void handle_remove_order(DeliveryService& delivery_service)
 {
     int order_id = read_int("Введите ID заказа для удаления: ");
     delivery_service -= order_id;
+    logger.log("REMOVE_ORDER", "Заказ номер " + to_string(order_id) + " удалён");
 }
 
 static void print_order_comparison(const Order* first_order, const Order* second_order, const string& op_symbol, bool result)
@@ -440,6 +483,8 @@ static void handle_manage_vehicle(DeliveryService& delivery_service)
 static void handle_specific_vehicle_action(Vehicle* vehicle)
 {
     vehicle->perform_specific_action();
+    logger.log("SPECIFIC_ACTION", "Транспорт номер " + to_string(vehicle->get_id())
+        + ": " + vehicle->get_specific_action_name());
 }
 
 static void handle_vehicle_delivery_cost(Vehicle* vehicle)
@@ -493,17 +538,29 @@ static void handle_assign_order(DeliveryService& delivery_service)
 {
     int order_id = read_int("Введите ID заказа: ");
     delivery_service.assign_order_to_vehicle(order_id);
+
+    for (size_t i = 0; i < delivery_service.get_vehicles_count(); i++)
+    {
+        const Vehicle& vehicle = delivery_service.get_vehicle_by_index(i);
+        if (vehicle.get_current_order_id() == order_id)
+            logger.log("ASSIGN_ORDER", "Заказ номер " + to_string(order_id)
+                + " назначен на транспорт номер " + to_string(vehicle.get_id()));
+    }
 }
 
 static void handle_complete_delivery(DeliveryService& delivery_service)
 {
     int vehicle_id = read_int("Введите ID транспорта, завершившего доставку: ");
+    int order_id = delivery_service.get_vehicle(vehicle_id)->get_current_order_id();
     delivery_service.complete_delivery(vehicle_id);
+    logger.log("COMPLETE_DELIVERY", "Транспорт номер " + to_string(vehicle_id)
+        + " завершил доставку заказа номер " + to_string(order_id));
 }
 
 static void handle_all_specific_actions(DeliveryService& delivery_service)
 {
     delivery_service.perform_all_specific_actions();
+    logger.log("SPECIFIC_ACTION", "Выполнены специфические действия всего транспорта");
 }
 
 static void handle_delivery_costs(DeliveryService& delivery_service)
@@ -512,11 +569,90 @@ static void handle_delivery_costs(DeliveryService& delivery_service)
     delivery_service.print_delivery_costs(weight);
 }
 
+static void handle_save_state(const DeliveryService& delivery_service)
+{
+    DataStorage storage(DATA_FILE_NAME);
+    storage.save(delivery_service);
+    cout << "Состояние сохранено в файл " << DATA_FILE_NAME << "." << endl;
+    logger.log("SAVE", string("Состояние сохранено в файл ") + DATA_FILE_NAME);
+}
+
+static void handle_load_state(DeliveryService& delivery_service)
+{
+    DataStorage storage(DATA_FILE_NAME);
+    delivery_service = storage.load();
+    cout << "Состояние загружено из файла " << DATA_FILE_NAME << "." << endl;
+    logger.log("LOAD", string("Состояние загружено из файла ") + DATA_FILE_NAME);
+}
+
+static void handle_create_report(const DeliveryService& delivery_service)
+{
+    ReportWriter report_writer(REPORT_FILE_NAME);
+    report_writer.write(delivery_service);
+    cout << "Отчёт сформирован в файле " << REPORT_FILE_NAME << "." << endl;
+    logger.log("REPORT", string("Сформирован отчёт ") + REPORT_FILE_NAME);
+}
+
+static bool initialize_state(DeliveryService& delivery_service)
+{
+    error_code error;
+    if (!filesystem::exists(DATA_FILE_NAME, error))
+    {
+        try
+        {
+            seed_data(delivery_service);
+            logger.log("SEED", "Файла состояния нет, загружены тестовые данные");
+        }
+        catch (...)
+        {
+            cout << "Не удалось полностью загрузить тестовые данные." << endl;
+            report_exception(current_exception());
+        }
+        return true;
+    }
+
+    try
+    {
+        DataStorage storage(DATA_FILE_NAME);
+        delivery_service = storage.load();
+        cout << "Состояние загружено из файла " << DATA_FILE_NAME << "." << endl;
+        logger.log("AUTOLOAD", string("Состояние загружено из файла ") + DATA_FILE_NAME + " при запуске");
+        return true;
+    }
+    catch (...)
+    {
+        cout << "Не удалось загрузить сохранённое состояние." << endl;
+        report_exception(current_exception());
+        cout << "Программа запущена с пустым состоянием. Автосохранение при выходе отключено, чтобы не затереть файл "
+            << DATA_FILE_NAME << ". Для ручного сохранения используйте пункт 15." << endl;
+        logger.log("AUTOSAVE_DISABLED", "Файл состояния не удалось загрузить, автосохранение при выходе отключено");
+        return false;
+    }
+}
+
+static void auto_save_state(const DeliveryService& delivery_service)
+{
+    try
+    {
+        DataStorage storage(DATA_FILE_NAME);
+        storage.save(delivery_service);
+        cout << "Состояние автоматически сохранено в файл " << DATA_FILE_NAME << "." << endl;
+        logger.log("AUTOSAVE", string("Состояние сохранено в файл ") + DATA_FILE_NAME + " при выходе");
+    }
+    catch (...)
+    {
+        cout << "Не удалось сохранить состояние при выходе." << endl;
+        report_exception(current_exception());
+    }
+}
+
 static void handle_change_vehicle_id(DeliveryService& delivery_service, Vehicle* vehicle)
 {
+    int old_vehicle_id = vehicle->get_id();
     int new_vehicle_id = read_int("Введите новый ID: ");
-    delivery_service.change_vehicle_id(vehicle->get_id(), new_vehicle_id);
+    delivery_service.change_vehicle_id(old_vehicle_id, new_vehicle_id);
     cout << "ID успешно изменен." << endl;
+    logger.log("CHANGE_VEHICLE_ID", "ID транспорта изменён с " + to_string(old_vehicle_id) + " на " + to_string(new_vehicle_id));
 }
 
 static void handle_change_vehicle_capacity(Vehicle* vehicle)
@@ -524,6 +660,8 @@ static void handle_change_vehicle_capacity(Vehicle* vehicle)
     double new_capacity = read_double("Введите новую грузоподъемность (кг): ");
     vehicle->set_capacity(new_capacity);
     cout << "Грузоподъемность успешно изменена." << endl;
+    logger.log("CHANGE_VEHICLE_CAPACITY", "Транспорт номер " + to_string(vehicle->get_id())
+        + ": грузоподъемность изменена на " + format("{:.1f}", new_capacity) + " кг");
 }
 
 static void handle_change_vehicle_courier(Vehicle* vehicle)
@@ -532,6 +670,8 @@ static void handle_change_vehicle_courier(Vehicle* vehicle)
     string courier_name;
     getline(cin, courier_name);
     vehicle->set_courier_name(courier_name);
+    logger.log("CHANGE_VEHICLE_COURIER", "Транспорт номер " + to_string(vehicle->get_id())
+        + ": курьер изменён на \"" + courier_name + "\"");
 }
 
 static void handle_change_vehicle_status(Vehicle* vehicle)
@@ -539,13 +679,17 @@ static void handle_change_vehicle_status(Vehicle* vehicle)
     bool current_availability_status = vehicle->get_is_available();
     vehicle->set_is_available(!current_availability_status);
     cout << "Статус изменен. Теперь транспорт: " << (vehicle->get_is_available() ? "Свободен" : "Заблокирован") << endl;
+    logger.log("CHANGE_VEHICLE_STATUS", "Транспорт номер " + to_string(vehicle->get_id())
+        + ": теперь " + (vehicle->get_is_available() ? "свободен" : "заблокирован"));
 }
 
 static void handle_change_order_id(DeliveryService& delivery_service, Order* order)
 {
+    int old_order_id = order->get_id();
     int new_order_id = read_int("Введите новый ID: ");
-    delivery_service.change_order_id(order->get_id(), new_order_id);
+    delivery_service.change_order_id(old_order_id, new_order_id);
     cout << "ID успешно изменен." << endl;
+    logger.log("CHANGE_ORDER_ID", "ID заказа изменён с " + to_string(old_order_id) + " на " + to_string(new_order_id));
 }
 
 static void handle_change_order_address(Order* order)
@@ -554,6 +698,8 @@ static void handle_change_order_address(Order* order)
     string new_address;
     getline(cin, new_address);
     order->set_address(new_address);
+    logger.log("CHANGE_ORDER_ADDRESS", "Заказ номер " + to_string(order->get_id())
+        + ": адрес изменён на \"" + new_address + "\"");
 }
 
 static void handle_change_order_weight(Order* order)
@@ -561,6 +707,8 @@ static void handle_change_order_weight(Order* order)
     double new_weight = read_double("Введите новый вес (кг): ");
     order->set_weight(new_weight);
     cout << "Вес успешно изменен." << endl;
+    logger.log("CHANGE_ORDER_WEIGHT", "Заказ номер " + to_string(order->get_id())
+        + ": вес изменён на " + format("{:.1f}", new_weight) + " кг");
 }
 
 static void handle_change_order_district(Order* order)
@@ -569,4 +717,6 @@ static void handle_change_order_district(Order* order)
     string new_district;
     getline(cin, new_district);
     order->set_district(new_district);
+    logger.log("CHANGE_ORDER_DISTRICT", "Заказ номер " + to_string(order->get_id())
+        + ": район изменён на \"" + new_district + "\"");
 }

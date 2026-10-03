@@ -53,6 +53,15 @@ public:
     const std::string& get_filename() const { return filename; }
 };
 
+class FileIOException : public DeliveryException
+{
+    std::string filename;
+public:
+    FileIOException(const std::string& filename, const std::string& operation)
+        : DeliveryException("Ошибка " + operation + " файла \"" + filename + "\""), filename(filename) {}
+    const std::string& get_filename() const { return filename; }
+};
+
 class FileFormatException : public DeliveryException
 {
     int line;
