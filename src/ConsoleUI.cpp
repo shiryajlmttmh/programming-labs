@@ -22,7 +22,7 @@
 using namespace std;
 
 static constexpr const char* DATA_FILE_NAME = "delivery_state.txt";
-static constexpr const char* LOG_FILE_NAME = "delivery_log.txt";
+static constexpr const char* LOG_FILE_NAME = "delivery.log";
 static constexpr const char* REPORT_FILE_NAME = "delivery_report.txt";
 
 static Logger logger(LOG_FILE_NAME);
