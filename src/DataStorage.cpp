@@ -17,6 +17,7 @@
 using namespace std;
 
 static constexpr char FIELD_SEPARATOR = ';';
+static constexpr char ESCAPE_CHAR = '\\';
 static constexpr const char* FORMAT_HEADER = "DELIVERY_STATE";
 static constexpr int FORMAT_VERSION = 1;
 static constexpr const char* VEHICLES_SECTION = "VEHICLES";
@@ -45,12 +46,11 @@ struct OrderFlag
     int line_number;
 };
 
-static void validate_text_field(const string& value, const string& field_description);
-static void validate_service_text_fields(const DeliveryService& service);
+static string escape_field(const string& value);
 static void write_vehicle(ostream& os, const Vehicle& vehicle);
 static void write_order(ostream& os, const Order& order);
 
-static vector<string> split_line(const string& line);
+static vector<string> split_line(const string& line, int line_number);
 static void require_field_count(const vector<string>& fields, size_t expected_count, int line_number);
 static int parse_int(const string& text, int line_number, const string& field_name);
 static double parse_double(const string& text, int line_number, const string& field_name);
@@ -68,8 +68,6 @@ DataStorage::DataStorage(const string& filename) : filename(filename) {}
 
 void DataStorage::save(const DeliveryService& service) const
 {
-    validate_service_text_fields(service);
-
     ofstream file(filename);
     if (!file) throw FileOpenException(filename, "записи");
 
@@ -107,7 +105,7 @@ DeliveryService DataStorage::load() const
         try
         {
             VehicleLink link{};
-            service.add_vehicle(parse_vehicle(split_line(line), line_number, link));
+            service.add_vehicle(parse_vehicle(split_line(line, line_number), line_number, link));
             vehicle_links.push_back(link);
         }
         catch (const FileFormatException&) { throw; }
@@ -122,7 +120,7 @@ DeliveryService DataStorage::load() const
         try
         {
             OrderFlag flag{};
-            service.add_order(parse_order(split_line(line), line_number, flag));
+            service.add_order(parse_order(split_line(line, line_number), line_number, flag));
             order_flags.push_back(flag);
         }
         catch (const FileFormatException&) { throw; }
@@ -135,27 +133,19 @@ DeliveryService DataStorage::load() const
     return service;
 }
 
-static void validate_text_field(const string& value, const string& field_description)
+static string escape_field(const string& value)
 {
-    if (value.find_first_of(string(1, FIELD_SEPARATOR) + "\r\n") != string::npos)
-        throw InvalidDataException("Поле \"" + field_description + "\" содержит запрещённый символ ('"
-            + string(1, FIELD_SEPARATOR) + "' или перевод строки): \"" + value + "\"");
-}
+    string result;
 
-static void validate_service_text_fields(const DeliveryService& service)
-{
-    for (size_t i = 0; i < service.get_vehicles_count(); i++)
+    for (char symbol : value)
     {
-        const Vehicle& vehicle = service.get_vehicle_by_index(i);
-        validate_text_field(vehicle.get_courier_name(), "имя курьера, транспорт номер " + to_string(vehicle.get_id()));
+        if (symbol == ESCAPE_CHAR || symbol == FIELD_SEPARATOR) { result += ESCAPE_CHAR; result += symbol; }
+        else if (symbol == '\n') { result += ESCAPE_CHAR; result += 'n'; }
+        else if (symbol == '\r') { result += ESCAPE_CHAR; result += 'r'; }
+        else result += symbol;
     }
 
-    for (size_t i = 0; i < service.get_orders_count(); i++)
-    {
-        const Order& order = service.get_order_by_index(i);
-        validate_text_field(order.get_address(), "адрес, заказ номер " + to_string(order.get_id()));
-        validate_text_field(order.get_district(), "район, заказ номер " + to_string(order.get_id()));
-    }
+    return result;
 }
 
 static void write_vehicle(ostream& os, const Vehicle& vehicle)
@@ -163,7 +153,7 @@ static void write_vehicle(ostream& os, const Vehicle& vehicle)
     os << vehicle.get_type_code() << FIELD_SEPARATOR
         << vehicle.get_id() << FIELD_SEPARATOR
         << format("{}", vehicle.get_capacity()) << FIELD_SEPARATOR
-        << vehicle.get_courier_name() << FIELD_SEPARATOR
+        << escape_field(vehicle.get_courier_name()) << FIELD_SEPARATOR
         << (vehicle.get_is_available() ? 1 : 0) << FIELD_SEPARATOR
         << vehicle.get_current_order_id() << FIELD_SEPARATOR
         << vehicle.get_specific_field() << '\n';
@@ -172,28 +162,36 @@ static void write_vehicle(ostream& os, const Vehicle& vehicle)
 static void write_order(ostream& os, const Order& order)
 {
     os << order.get_id() << FIELD_SEPARATOR
-        << order.get_address() << FIELD_SEPARATOR
+        << escape_field(order.get_address()) << FIELD_SEPARATOR
         << format("{}", order.get_weight()) << FIELD_SEPARATOR
-        << order.get_district() << FIELD_SEPARATOR
+        << escape_field(order.get_district()) << FIELD_SEPARATOR
         << (order.get_is_assigned() ? 1 : 0) << '\n';
 }
 
-static vector<string> split_line(const string& line)
+static vector<string> split_line(const string& line, int line_number)
 {
-    vector<string> fields;
-    size_t start = 0;
+    vector<string> fields(1);
 
-    while (true)
+    for (size_t i = 0; i < line.size(); i++)
     {
-        size_t separator_pos = line.find(FIELD_SEPARATOR, start);
-        if (separator_pos == string::npos)
-        {
-            fields.push_back(line.substr(start));
-            break;
-        }
+        char symbol = line[i];
 
-        fields.push_back(line.substr(start, separator_pos - start));
-        start = separator_pos + 1;
+        if (symbol == FIELD_SEPARATOR) { fields.emplace_back(); continue; }
+        if (symbol != ESCAPE_CHAR) { fields.back() += symbol; continue; }
+
+        if (++i == line.size())
+            throw FileFormatException(line_number, "строка заканчивается символом экранирования");
+
+        switch (line[i])
+        {
+        case 'n': fields.back() += '\n'; break;
+        case 'r': fields.back() += '\r'; break;
+        case ESCAPE_CHAR:
+        case FIELD_SEPARATOR: fields.back() += line[i]; break;
+        default:
+            throw FileFormatException(line_number, "неизвестная последовательность экранирования: \""
+                + string(1, ESCAPE_CHAR) + string(1, line[i]) + "\"");
+        }
     }
 
     return fields;
@@ -261,7 +259,7 @@ static int parse_flag(const string& text, int line_number, const string& field_n
 static void read_file_header(istream& file, const string& filename, int& line_number)
 {
     string line = read_line(file, filename, line_number);
-    vector<string> fields = split_line(line);
+    vector<string> fields = split_line(line, line_number);
 
     if (fields[0] != FORMAT_HEADER)
         throw FileFormatException(line_number, "файл не является сохранением службы доставки (ожидался заголовок \""
@@ -278,7 +276,7 @@ static void read_file_header(istream& file, const string& filename, int& line_nu
 static int read_section_header(istream& file, const string& filename, int& line_number, const string& section_name)
 {
     string line = read_line(file, filename, line_number);
-    vector<string> fields = split_line(line);
+    vector<string> fields = split_line(line, line_number);
 
     if (fields[0] != section_name)
         throw FileFormatException(line_number, "ожидалась секция \"" + section_name + "\", получено: \"" + line + "\"");
