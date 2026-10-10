@@ -1,11 +1,39 @@
 #include "DeliveryAnalytics.h"
 #include "Exceptions.h"
 #include <algorithm>
+#include <numeric>
+#include <iterator>
 #include <format>
 
 using namespace std;
 
+static const string NO_DISTRICT_LABEL = "(не указан)";
+
 DeliveryAnalytics::DeliveryAnalytics(const DeliveryService& service) : service(service) {}
+
+vector<const Order*> DeliveryAnalytics::collect_orders() const
+{
+    const Collection<Order>& orders = service.get_orders();
+    vector<const Order*> result;
+    result.reserve(orders.get_items_count());
+
+    transform(orders.begin(), orders.end(), back_inserter(result),
+        [](const Order& order) { return &order; });
+
+    return result;
+}
+
+vector<const Vehicle*> DeliveryAnalytics::collect_vehicles() const
+{
+    const vector<unique_ptr<Vehicle>>& vehicles = service.get_vehicles();
+    vector<const Vehicle*> result;
+    result.reserve(vehicles.size());
+
+    transform(vehicles.begin(), vehicles.end(), back_inserter(result),
+        [](const unique_ptr<Vehicle>& vehicle) { return vehicle.get(); });
+
+    return result;
+}
 
 vector<const Order*> DeliveryAnalytics::find_orders(const OrderFilter& filter) const
 {
@@ -54,7 +82,7 @@ vector<const Vehicle*> DeliveryAnalytics::find_vehicles(const VehicleFilter& fil
 
 vector<const Order*> DeliveryAnalytics::sort_orders(OrderSortKey key, bool ascending) const
 {
-    vector<const Order*> result = find_orders(OrderFilter{});
+    vector<const Order*> result = collect_orders();
 
     auto is_before = [key](const Order* first, const Order* second)
         {
@@ -83,7 +111,7 @@ vector<const Order*> DeliveryAnalytics::sort_orders(OrderSortKey key, bool ascen
 
 vector<const Vehicle*> DeliveryAnalytics::sort_vehicles(VehicleSortKey key, bool ascending) const
 {
-    vector<const Vehicle*> result = find_vehicles(VehicleFilter{});
+    vector<const Vehicle*> result = collect_vehicles();
 
     auto is_before = [key](const Vehicle* first, const Vehicle* second)
         {
@@ -173,4 +201,104 @@ set<string> DeliveryAnalytics::get_unique_districts() const
         });
 
     return districts;
+}
+
+DeliveryAnalytics::OrderGroups DeliveryAnalytics::group_orders_by_district() const
+{
+    const Collection<Order>& orders = service.get_orders();
+    OrderGroups groups;
+
+    for_each(orders.begin(), orders.end(),
+        [&groups](const Order& order)
+        {
+            const string district = order.get_district();
+            groups[district.empty() ? NO_DISTRICT_LABEL : district].push_back(&order);
+        });
+
+    return groups;
+}
+
+DeliveryAnalytics::VehicleGroups DeliveryAnalytics::group_vehicles_by_type() const
+{
+    const vector<unique_ptr<Vehicle>>& vehicles = service.get_vehicles();
+    VehicleGroups groups;
+
+    for_each(vehicles.begin(), vehicles.end(),
+        [&groups](const unique_ptr<Vehicle>& vehicle)
+        {
+            groups[vehicle->get_type()].push_back(vehicle.get());
+        });
+
+    return groups;
+}
+
+double DeliveryAnalytics::get_total_order_weight() const
+{
+    const Collection<Order>& orders = service.get_orders();
+
+    return accumulate(orders.begin(), orders.end(), 0.0,
+        [](double sum, const Order& order) { return sum + order.get_weight(); });
+}
+
+double DeliveryAnalytics::get_waiting_order_weight() const
+{
+    const Collection<Order>& orders = service.get_orders();
+
+    return accumulate(orders.begin(), orders.end(), 0.0,
+        [](double sum, const Order& order)
+        {
+            return order.get_is_assigned() ? sum : sum + order.get_weight();
+        });
+}
+
+double DeliveryAnalytics::get_average_order_weight() const
+{
+    size_t count = service.get_orders_count();
+    if (count == 0)
+        throw InvalidOperationException("Нет заказов, невозможно вычислить средний вес");
+
+    return get_total_order_weight() / static_cast<double>(count);
+}
+
+double DeliveryAnalytics::get_total_vehicle_capacity() const
+{
+    const vector<unique_ptr<Vehicle>>& vehicles = service.get_vehicles();
+
+    return accumulate(vehicles.begin(), vehicles.end(), 0.0,
+        [](double sum, const unique_ptr<Vehicle>& vehicle) { return sum + vehicle->get_capacity(); });
+}
+
+double DeliveryAnalytics::get_available_vehicle_capacity() const
+{
+    const vector<unique_ptr<Vehicle>>& vehicles = service.get_vehicles();
+
+    return accumulate(vehicles.begin(), vehicles.end(), 0.0,
+        [](double sum, const unique_ptr<Vehicle>& vehicle)
+        {
+            return vehicle->get_is_available() ? sum + vehicle->get_capacity() : sum;
+        });
+}
+
+map<string, double> DeliveryAnalytics::get_weight_by_district() const
+{
+    OrderGroups groups = group_orders_by_district();
+    map<string, double> result;
+
+    for_each(groups.begin(), groups.end(),
+        [&result](const OrderGroups::value_type& group)
+        {
+            result[group.first] = accumulate(group.second.begin(), group.second.end(), 0.0,
+                [](double sum, const Order* order) { return sum + order->get_weight(); });
+        });
+
+    return result;
+}
+
+double DeliveryAnalytics::get_waiting_load_ratio() const
+{
+    double available_capacity = get_available_vehicle_capacity();
+    if (available_capacity <= 0)
+        throw InvalidOperationException("Нет свободного транспорта, невозможно рассчитать загрузку");
+
+    return get_waiting_order_weight() / available_capacity;
 }

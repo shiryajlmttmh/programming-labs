@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <set>
+#include <map>
 #include <string>
 #include <optional>
 #include <limits>
@@ -8,6 +9,7 @@
 #include "DeliveryService.h"
 #include "Vehicle.h"
 #include "Order.h"
+
 
 struct OrderFilter
 {
@@ -29,8 +31,15 @@ enum class VehicleSortKey { Id, Capacity, CourierName };
 
 class DeliveryAnalytics
 {
+public:
+    using OrderGroups = std::map<std::string, std::vector<const Order*>>;
+    using VehicleGroups = std::map<std::string, std::vector<const Vehicle*>>;
+
 private:
     const DeliveryService& service;
+
+    std::vector<const Order*> collect_orders() const;
+    std::vector<const Vehicle*> collect_vehicles() const;
 
 public:
     explicit DeliveryAnalytics(const DeliveryService& service);
@@ -49,4 +58,16 @@ public:
     size_t count_available_vehicles() const;
 
     std::set<std::string> get_unique_districts() const;
+
+    OrderGroups group_orders_by_district() const;
+    VehicleGroups group_vehicles_by_type() const;
+
+    double get_total_order_weight() const;
+    double get_waiting_order_weight() const;
+    double get_average_order_weight() const;
+    double get_total_vehicle_capacity() const;
+    double get_available_vehicle_capacity() const;
+    std::map<std::string, double> get_weight_by_district() const;
+
+    double get_waiting_load_ratio() const;
 };
