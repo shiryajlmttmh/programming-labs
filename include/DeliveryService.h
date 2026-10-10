@@ -42,6 +42,9 @@ public:
     size_t get_orders_count() const;
     const Order& get_order_by_index(size_t index) const;
 
+    const std::vector<std::unique_ptr<Vehicle>>& get_vehicles() const;
+    const Collection<Order>& get_orders() const;
+
     DeliveryService& operator+=(const Order& order);
     DeliveryService& operator+=(std::unique_ptr<Vehicle> vehicle);
     DeliveryService& operator-=(int order_id);

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
+#include <iterator>
 
 template <typename T>
 class Collection
@@ -11,6 +13,9 @@ private:
     std::vector<T> items;
 
 public:
+    using iterator = typename std::vector<T>::iterator;
+    using const_iterator = typename std::vector<T>::const_iterator;
+
     void add_item(const T& item);
     void remove_item_by_index(size_t index);
 
@@ -23,6 +28,11 @@ public:
     size_t get_items_count() const;
     void clear_collection();
     void print_collection() const;
+
+    iterator begin() { return items.begin(); }
+    iterator end() { return items.end(); }
+    const_iterator begin() const { return items.begin(); }
+    const_iterator end() const { return items.end(); }
 };
 
 template <typename T>
@@ -64,10 +74,10 @@ T& Collection<T>::get_item_by_index(size_t index)
 template <typename T>
 int Collection<T>::find_index(const T& target) const
 {
-    for (size_t i = 0; i < items.size(); i++)
-        if (items[i] == target) return static_cast<int>(i);
+    auto it = std::find(items.begin(), items.end(), target);
+    if (it == items.end()) return -1;
 
-    return -1;
+    return static_cast<int>(std::distance(items.begin(), it));
 }
 
 template <typename T>
@@ -97,19 +107,13 @@ void Collection<T>::print_collection() const
         return;
     }
 
-    for (size_t i = 0; i < items.size(); i++)
-    {
-        std::cout << items[i] << std::endl;
-    }
+    std::for_each(items.begin(), items.end(),
+        [](const T& item) { std::cout << item << std::endl; });
 }
 
 template <typename T, typename Predicate>
 const T* find_if_matching(const Collection<T>& collection, Predicate predicate)
 {
-    for (size_t i = 0; i < collection.get_items_count(); i++)
-    {
-        const T& item = collection.get_item_by_index(i);
-        if (predicate(item)) return &item;
-    }
-    return nullptr;
+    auto it = std::find_if(collection.begin(), collection.end(), predicate);
+    return it != collection.end() ? &*it : nullptr;
 }

@@ -2,6 +2,8 @@
 #include "Exceptions.h"
 #include <iostream>
 #include <format>
+#include <algorithm>
+#include <iterator>
 
 using namespace std;
 
@@ -10,8 +12,8 @@ void DeliveryService::print_all_vehicles() const
     cout << "\n--- Список транспорта ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
 
-    for (size_t i = 0; i < vehicles.size(); i++)
-        cout << *vehicles[i] << endl;
+    for_each(vehicles.begin(), vehicles.end(),
+        [](const unique_ptr<Vehicle>& vehicle) { cout << *vehicle << endl; });
 }
 
 void DeliveryService::perform_all_specific_actions()
@@ -19,8 +21,8 @@ void DeliveryService::perform_all_specific_actions()
     cout << "\n--- Специфические действия всего транспорта ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
 
-    for (size_t i = 0; i < vehicles.size(); i++)
-        vehicles[i]->perform_specific_action();
+    for_each(vehicles.begin(), vehicles.end(),
+        [](const unique_ptr<Vehicle>& vehicle) { vehicle->perform_specific_action(); });
 }
 
 void DeliveryService::print_delivery_costs(double order_weight) const
@@ -31,15 +33,16 @@ void DeliveryService::print_delivery_costs(double order_weight) const
     cout << "\n--- Стоимость доставки груза весом " << order_weight << " кг ---" << endl;
     if (vehicles.empty()) { cout << "Список пуст." << endl; return; }
 
-    for (size_t i = 0; i < vehicles.size(); i++)
-    {
-        cout << vehicles[i]->get_type() << " номер " << vehicles[i]->get_id() << " (" << vehicles[i]->get_courier_name() << "): ";
+    for_each(vehicles.begin(), vehicles.end(),
+        [order_weight](const unique_ptr<Vehicle>& vehicle)
+        {
+            cout << vehicle->get_type() << " номер " << vehicle->get_id() << " (" << vehicle->get_courier_name() << "): ";
 
-        if (!vehicles[i]->can_carry(order_weight))
-            cout << "груз превышает грузоподъемность (" << vehicles[i]->get_capacity() << " кг)" << endl;
-        else
-            cout << format("{:.2f}", vehicles[i]->calculate_delivery_cost(order_weight)) << " руб." << endl;
-    }
+            if (!vehicle->can_carry(order_weight))
+                cout << "груз превышает грузоподъемность (" << vehicle->get_capacity() << " кг)" << endl;
+            else
+                cout << format("{:.2f}", vehicle->calculate_delivery_cost(order_weight)) << " руб." << endl;
+        });
 }
 
 void DeliveryService::print_all_orders() const
@@ -103,39 +106,44 @@ void DeliveryService::change_order_id(int old_id, int new_id)
 
 int DeliveryService::find_optimal_vehicle_index(double order_weight) const
 {
-    int vehicle_index = -1;
-    double min_capacity = 0;
-
-    for (size_t i = 0; i < vehicles.size(); i++)
-    {
-        double curr_capacity = vehicles[i]->get_capacity();
-        if (vehicles[i]->get_is_available() && vehicles[i]->can_carry(order_weight))
+    auto is_suitable = [order_weight](const unique_ptr<Vehicle>& vehicle)
         {
-            if (vehicle_index == -1 || curr_capacity < min_capacity)
-            {
-                min_capacity = curr_capacity;
-                vehicle_index = static_cast<int>(i);
-            }
-        }
-    }
+            return vehicle->get_is_available() && vehicle->can_carry(order_weight);
+        };
 
-    return vehicle_index;
+    auto it = min_element(vehicles.begin(), vehicles.end(),
+        [&is_suitable](const unique_ptr<Vehicle>& first, const unique_ptr<Vehicle>& second)
+        {
+            bool first_suitable = is_suitable(first);
+            bool second_suitable = is_suitable(second);
+
+            if (first_suitable != second_suitable) return first_suitable;
+            return first_suitable && first->get_capacity() < second->get_capacity();
+        });
+
+    if (it == vehicles.end() || !is_suitable(*it)) return -1;
+
+    return static_cast<int>(distance(vehicles.begin(), it));
 }
 
 int DeliveryService::find_vehicle_index_by_id(int id) const
 {
-    for (size_t i = 0; i < vehicles.size(); i++)
-        if (vehicles[i]->get_id() == id) return static_cast<int>(i);
+    auto it = find_if(vehicles.begin(), vehicles.end(),
+        [id](const unique_ptr<Vehicle>& vehicle) { return vehicle->get_id() == id; });
 
-    return -1;
+    if (it == vehicles.end()) return -1;
+
+    return static_cast<int>(distance(vehicles.begin(), it));
 }
 
 int DeliveryService::find_order_index_by_id(int id) const
 {
-    for (size_t i = 0; i < orders.get_items_count(); i++)
-        if (orders.get_item_by_index(i).get_id() == id) return static_cast<int>(i);
+    auto it = find_if(orders.begin(), orders.end(),
+        [id](const Order& order) { return order.get_id() == id; });
 
-    return -1;
+    if (it == orders.end()) return -1;
+
+    return static_cast<int>(distance(orders.begin(), it));
 }
 
 void DeliveryService::assign_order_to_vehicle(int order_id)
@@ -223,6 +231,9 @@ const Order& DeliveryService::get_order_by_index(size_t index) const
 {
     return orders.get_item_by_index(index);
 }
+
+const vector<unique_ptr<Vehicle>>& DeliveryService::get_vehicles() const { return vehicles; }
+const Collection<Order>& DeliveryService::get_orders() const { return orders; }
 
 DeliveryService& DeliveryService::operator+=(const Order& order) { this->add_order(order); return *this; }
 DeliveryService& DeliveryService::operator+=(unique_ptr<Vehicle> vehicle) { this->add_vehicle(move(vehicle)); return *this; }
