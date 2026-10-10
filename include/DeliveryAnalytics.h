@@ -10,7 +10,6 @@
 #include "Vehicle.h"
 #include "Order.h"
 
-
 struct OrderFilter
 {
     std::string district;
@@ -31,10 +30,6 @@ enum class VehicleSortKey { Id, Capacity, CourierName };
 
 class DeliveryAnalytics
 {
-public:
-    using OrderGroups = std::map<std::string, std::vector<const Order*>>;
-    using VehicleGroups = std::map<std::string, std::vector<const Vehicle*>>;
-
 private:
     const DeliveryService& service;
 
@@ -42,6 +37,9 @@ private:
     std::vector<const Vehicle*> collect_vehicles() const;
 
 public:
+    using OrderGroups = std::map<std::string, std::vector<const Order*>>;
+    using VehicleGroups = std::map<std::string, std::vector<const Vehicle*>>;
+
     explicit DeliveryAnalytics(const DeliveryService& service);
 
     std::vector<const Order*> find_orders(const OrderFilter& filter) const;
